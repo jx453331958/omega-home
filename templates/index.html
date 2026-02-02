@@ -12,22 +12,21 @@
         }
     </script>
     <style>
-        @keyframes breathe {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.3); }
-        }
-        .breathe { animation: breathe 2s ease-in-out infinite; }
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; }
+        .fade-in-up { animation: fadeInUp 0.4s ease-out forwards; opacity: 0; }
         .fade-delay-1 { animation-delay: 0.1s; }
         .fade-delay-2 { animation-delay: 0.2s; }
         .fade-delay-3 { animation-delay: 0.3s; }
     </style>
 </head>
 <body class="min-h-screen transition-colors duration-500" :class="themeClass">
+    <!-- Top ambient glow -->
+    <div class="fixed top-0 left-0 right-0 h-[600px] pointer-events-none -z-10"
+        style="background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120,119,198,0.15), transparent)"></div>
+
     <!-- Background overlay for custom image -->
     <div x-show="settings.background_image" class="fixed inset-0 bg-cover bg-center -z-10" :style="settings.background_image ? 'background-image: url(' + settings.background_image + ')' : ''"></div>
 
@@ -39,38 +38,43 @@
                     <template x-if="settings.logo">
                         <img :src="settings.logo" class="w-10 h-10 rounded-lg" alt="logo">
                     </template>
-                    <template x-if="!settings.logo">
-                        <span class="text-3xl">🏠</span>
-                    </template>
-                    <div>
-                        <h1 class="text-2xl font-bold text-white" x-text="settings.title || 'Omega Home'"></h1>
-                        <p class="text-white/60 text-sm" x-text="settings.subtitle || ''"></p>
-                    </div>
+                    <h1 class="text-xl font-bold text-white" x-text="settings.title || 'Omega Home'"></h1>
                 </div>
                 <div class="flex items-center gap-4">
                     <!-- Clock -->
-                    <div x-show="settings.clock_enabled === 'true'" class="text-white/80 text-lg font-mono" x-text="clock"></div>
-                    <!-- Dark mode toggle -->
-                    <button @click="darkMode = !darkMode; localStorage.setItem('darkMode', darkMode)" class="p-2 rounded-lg backdrop-blur-md bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all">
-                        <span x-show="!darkMode">🌙</span>
-                        <span x-show="darkMode">☀️</span>
+                    <div x-show="settings.clock_enabled === 'true'" class="text-white/40 text-sm font-mono tabular-nums" x-text="clock"></div>
+                    <!-- Theme toggle -->
+                    <button @click="darkMode = !darkMode; localStorage.setItem('darkMode', darkMode)"
+                        class="p-2 rounded-lg bg-white/5 border border-white/8 text-white/50 hover:bg-white/10 hover:text-white/80 transition-all duration-200">
+                        <svg x-show="!darkMode" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 006.002-2.082z" />
+                        </svg>
+                        <svg x-show="darkMode" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                        </svg>
                     </button>
                 </div>
             </div>
         </header>
 
-        <!-- Greeting -->
-        <div x-show="settings.greeting_enabled === 'true'" class="max-w-6xl mx-auto px-4 pb-4">
-            <p class="text-white/70 text-lg" x-text="greeting"></p>
+        <!-- Greeting (minimal) -->
+        <div x-show="settings.greeting_enabled === 'true'" class="max-w-6xl mx-auto px-4 pb-2">
+            <p class="text-white/30 text-sm" x-text="greeting"></p>
         </div>
 
         <!-- Search bar -->
-        <div x-show="settings.search_enabled === 'true'" class="max-w-2xl mx-auto px-4 pb-6">
-            <div class="backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl px-5 py-3 flex items-center gap-3 shadow-lg">
-                <span class="text-white/50">🔍</span>
+        <div x-show="settings.search_enabled === 'true'" class="max-w-xl mx-auto px-4 pb-6">
+            <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 flex items-center gap-3 focus-within:border-white/20 focus-within:ring-1 focus-within:ring-white/10 transition-all duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white/30 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
                 <input type="text" x-model="search" placeholder="搜索服务..."
-                    class="w-full bg-transparent text-white placeholder-white/40 outline-none text-lg">
-                <button x-show="search" @click="search = ''" class="text-white/50 hover:text-white">✕</button>
+                    class="w-full bg-transparent text-white/90 placeholder-white/30 outline-none text-sm">
+                <button x-show="search" @click="search = ''" class="text-white/30 hover:text-white/60 transition-colors duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
         </div>
 
@@ -79,8 +83,8 @@
             <div class="flex flex-wrap gap-2">
                 <template x-for="b in bookmarks" :key="b.id">
                     <a :href="b.url" target="_blank"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-md bg-white/10 border border-white/20 text-white/80 text-sm hover:bg-white/20 hover:text-white transition-all">
-                        <span x-text="b.icon || '🔗'" class="text-xs"></span>
+                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/[0.08] text-white/50 text-xs hover:bg-white/10 hover:text-white/70 transition-all duration-200">
+                        <span x-text="b.icon || ''" class="text-xs" x-show="b.icon"></span>
                         <span x-text="b.name"></span>
                     </a>
                 </template>
@@ -91,11 +95,8 @@
         <main class="max-w-6xl mx-auto px-4 pb-12 space-y-8">
             <template x-for="(group, gi) in filteredGroups" :key="group.id">
                 <section class="fade-in-up" :class="'fade-delay-' + (gi % 4)">
-                    <h2 class="text-lg font-semibold text-white/90 mb-4 flex items-center gap-2">
-                        <span x-text="group.icon || '📁'"></span>
-                        <span x-text="group.name"></span>
-                    </h2>
-                    <div class="grid gap-4"
+                    <h2 class="text-xs uppercase tracking-wider text-white/40 font-medium mb-4" x-text="group.name"></h2>
+                    <div class="grid gap-3"
                         :class="{
                             'grid-cols-1': true,
                             'sm:grid-cols-2': group.columns >= 2,
@@ -104,23 +105,23 @@
                         }">
                         <template x-for="svc in group.services" :key="svc.id">
                             <a :href="svc.url" :target="svc.target || '_blank'"
-                                class="group block backdrop-blur-md bg-white/10 border border-white/20 rounded-xl p-4 hover:-translate-y-1 hover:shadow-xl hover:bg-white/15 transition-all duration-300 cursor-pointer">
-                                <div class="flex items-start gap-3">
+                                class="group block bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.06)] hover:border-white/[0.15] hover:bg-white/[0.05] transition-all duration-200 cursor-pointer">
+                                <div class="flex items-center gap-3">
                                     <template x-if="svc.icon && svc.icon.startsWith('http')">
-                                        <img :src="svc.icon" class="w-8 h-8 rounded-lg flex-shrink-0" alt="">
+                                        <img :src="svc.icon" class="w-10 h-10 rounded-lg flex-shrink-0" alt="">
                                     </template>
                                     <template x-if="!svc.icon || !svc.icon.startsWith('http')">
-                                        <div class="text-2xl flex-shrink-0" x-text="svc.icon || '🌐'"></div>
+                                        <div class="w-10 h-10 rounded-lg bg-white/[0.06] flex items-center justify-center text-lg flex-shrink-0" x-text="svc.icon || '·'"></div>
                                     </template>
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center gap-2">
-                                            <span class="font-medium text-white group-hover:text-white/90" x-text="svc.name"></span>
+                                            <span class="font-medium text-white/90 text-sm" x-text="svc.name"></span>
                                             <template x-if="svc.status_check && status[svc.id]">
                                                 <span class="w-2 h-2 rounded-full flex-shrink-0"
-                                                    :class="status[svc.id].online ? 'bg-green-400 breathe' : 'bg-red-400'"></span>
+                                                    :class="status[svc.id].online ? 'bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]' : 'bg-red-500'"></span>
                                             </template>
                                         </div>
-                                        <p class="text-white/50 text-sm truncate" x-text="svc.description"></p>
+                                        <p class="text-white/40 text-sm truncate" x-text="svc.description"></p>
                                     </div>
                                 </div>
                             </a>
@@ -130,15 +131,16 @@
             </template>
 
             <div x-show="filteredGroups.length === 0 && !loading" class="text-center py-20">
-                <p class="text-white/40 text-lg" x-text="search ? '没有找到匹配的服务' : '暂无服务，请在管理后台添加'"></p>
+                <p class="text-white/30 text-sm" x-text="search ? '没有找到匹配的服务' : '暂无服务，请在管理后台添加'"></p>
             </div>
         </main>
 
         <!-- Footer -->
-        <footer class="py-6 text-center text-white/30 text-sm">
-            <span x-text="settings.footer_text || 'Powered by Omega Home'"></span>
-            <span class="mx-2">·</span>
-            <a href="/admin" class="hover:text-white/60 transition-colors">⚙️ 管理</a>
+        <footer class="py-6 px-4">
+            <div class="max-w-6xl mx-auto flex items-center justify-between">
+                <span class="text-white/20 text-xs" x-text="settings.footer_text || 'Powered by Omega Home'"></span>
+                <a href="/admin" class="text-white/20 text-xs hover:text-white/40 transition-colors duration-200">管理</a>
+            </div>
         </footer>
     </div>
 
@@ -156,22 +158,20 @@
 
             get greeting() {
                 const h = new Date().getHours();
-                if (h < 6) return '🌙 夜深了，注意休息';
-                if (h < 12) return '☀️ 早上好';
-                if (h < 14) return '🌤️ 中午好';
-                if (h < 18) return '🌇 下午好';
-                return '🌆 晚上好';
+                if (h < 6) return '夜深了，注意休息';
+                if (h < 12) return '早上好';
+                if (h < 14) return '中午好';
+                if (h < 18) return '下午好';
+                return '晚上好';
             },
 
             get themeClass() {
                 const themes = {
-                    'indigo-purple': 'bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500',
-                    'dark-space': 'bg-gradient-to-br from-gray-900 via-slate-900 to-zinc-900',
-                    'emerald': 'bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-500',
-                    'warm-orange': 'bg-gradient-to-br from-orange-500 via-red-500 to-pink-500',
-                    'aurora': 'bg-gradient-to-br from-green-400 via-cyan-500 to-blue-600',
+                    'midnight': 'bg-[#0a0a0a]',
+                    'deep-blue': 'bg-gradient-to-br from-[#0a1628] to-[#0d1117]',
+                    'charcoal': 'bg-gradient-to-br from-[#18181b] to-[#09090b]',
                 };
-                return themes[this.settings.theme] || themes['indigo-purple'];
+                return themes[this.settings.theme] || themes['midnight'];
             },
 
             get filteredGroups() {
