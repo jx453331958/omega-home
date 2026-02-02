@@ -304,13 +304,14 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">URL *</label>
-                    <div class="flex flex-wrap sm:flex-nowrap gap-2">
-                        <input type="url" x-model="editingService.url" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button @click="fetchMeta()" :disabled="fetchingMeta || !editingService.url" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap">
-                            <span x-show="!fetchingMeta">自动获取</span>
-                            <span x-show="fetchingMeta">获取中...</span>
-                        </button>
-                    </div>
+                    <input type="url" x-model="editingService.url" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button @click="fetchMeta()" :disabled="fetchingMeta || !editingService.url" class="mt-2 w-full px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <span x-show="!fetchingMeta">🔍 自动获取图标和描述</span>
+                        <span x-show="fetchingMeta">获取中...</span>
+                    </button>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">图标（emoji 或 URL）</label>
