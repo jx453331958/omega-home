@@ -28,62 +28,11 @@
 [GIN-debug] GET    /api/admin/settings       --> omega-home/handlers.GetSettings (4 handlers)
 [GIN-debug] PUT    /api/admin/settings       --> omega-home/handlers.UpdateSettings (4 handlers)
 [GIN-debug] POST   /api/admin/upload         --> omega-home/handlers.UploadImage (4 handlers)
-2026/02/02 12:12:46 Omega Home starting on port 3000
+2026/02/02 12:22:49 Omega Home starting on port 3000
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on :3000
-2026/02/02 12:12:47 Status check complete: 3 services checked
-[GIN] 2026/02/02 - 12:12:51 | 200 |     645.151µs |       127.0.0.1 | GET      "/"
-[GIN] 2026/02/02 - 12:13:05 | 200 |      97.865µs |   192.168.1.150 | GET      "/"
-[GIN] 2026/02/02 - 12:13:09 | 200 |     119.067µs |   192.168.1.150 | GET      "/"
-[GIN] 2026/02/02 - 12:13:10 | 200 |     992.843µs |   192.168.1.150 | GET      "/api/config"
-[GIN] 2026/02/02 - 12:13:10 | 200 |     604.214µs |   192.168.1.150 | GET      "/api/config"
-[GIN] 2026/02/02 - 12:13:10 | 200 |     153.303µs |   192.168.1.150 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:13:10 | 200 |      33.141µs |   192.168.1.150 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:13:10 | 404 |         947ns |   192.168.1.150 | GET      "/favicon.ico"
-[GIN] 2026/02/02 - 12:13:40 | 200 |      21.424µs |   192.168.1.150 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:13:40 | 200 |      25.492µs |   192.168.1.150 | GET      "/api/status"
-2026/02/02 12:13:47 Status check complete: 3 services checked
-[GIN] 2026/02/02 - 12:14:10 | 200 |      26.476µs |   192.168.1.150 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:14:10 | 200 |      29.159µs |   192.168.1.150 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:14:40 | 200 |      15.107µs |   192.168.1.150 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:14:40 | 200 |      11.523µs |   192.168.1.150 | GET      "/api/status"
-2026/02/02 12:14:47 Status check complete: 3 services checked
-[GIN] 2026/02/02 - 12:15:10 | 200 |      28.578µs |   192.168.1.150 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:15:10 | 200 |      28.238µs |   192.168.1.150 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:15:40 | 200 |      20.746µs |   192.168.1.150 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:15:40 | 200 |      20.258µs |   192.168.1.150 | GET      "/api/status"
-2026/02/02 12:15:47 Status check complete: 3 services checked
-[GIN] 2026/02/02 - 12:15:50 | 200 |     158.406µs |     192.168.1.5 | GET      "/"
-[GIN] 2026/02/02 - 12:15:51 | 200 |     669.491µs |     192.168.1.5 | GET      "/api/config"
-[GIN] 2026/02/02 - 12:15:51 | 404 |         571ns |     192.168.1.5 | GET      "/favicon.ico"
-[GIN] 2026/02/02 - 12:15:51 | 200 |      671.45µs |     192.168.1.5 | GET      "/api/config"
-[GIN] 2026/02/02 - 12:15:51 | 200 |      15.905µs |     192.168.1.5 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:15:51 | 200 |      18.962µs |     192.168.1.5 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:16:02 | 200 |     985.431µs |     192.168.1.5 | GET      "/admin"
-[GIN] 2026/02/02 - 12:16:05 | 200 |     118.821µs |     192.168.1.5 | POST     "/api/admin/login"
-[GIN] 2026/02/02 - 12:16:05 | 200 |     266.543µs |     192.168.1.5 | GET      "/api/admin/services"
-[GIN] 2026/02/02 - 12:16:05 | 200 |     192.437µs |     192.168.1.5 | GET      "/api/admin/groups"
-[GIN] 2026/02/02 - 12:16:05 | 200 |      162.96µs |     192.168.1.5 | GET      "/api/admin/settings"
-[GIN] 2026/02/02 - 12:16:05 | 200 |     471.522µs |     192.168.1.5 | GET      "/api/admin/bookmarks"
-[GIN] 2026/02/02 - 12:16:10 | 200 |     129.272µs |     192.168.1.5 | GET      "/"
-[GIN] 2026/02/02 - 12:16:10 | 200 |     445.276µs |     192.168.1.5 | GET      "/api/config"
-[GIN] 2026/02/02 - 12:16:10 | 200 |     431.292µs |     192.168.1.5 | GET      "/api/config"
-[GIN] 2026/02/02 - 12:16:10 | 200 |      40.406µs |     192.168.1.5 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:16:10 | 200 |       13.32µs |     192.168.1.5 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:16:10 | 200 |      16.258µs |   192.168.1.150 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:16:10 | 200 |      18.614µs |   192.168.1.150 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:16:40 | 200 |      37.407µs |     192.168.1.5 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:16:40 | 200 |      17.445µs |     192.168.1.5 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:16:40 | 200 |      14.396µs |   192.168.1.150 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:16:40 | 200 |      12.885µs |   192.168.1.150 | GET      "/api/status"
-2026/02/02 12:16:48 Status check complete: 3 services checked
-[GIN] 2026/02/02 - 12:17:10 | 200 |      37.933µs |     192.168.1.5 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:17:10 | 200 |      26.079µs |     192.168.1.5 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:17:10 | 200 |      23.574µs |   192.168.1.150 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:17:10 | 200 |      21.764µs |   192.168.1.150 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:17:40 | 200 |      20.587µs |   192.168.1.150 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:17:40 | 200 |      25.697µs |   192.168.1.150 | GET      "/api/status"
-2026/02/02 12:17:48 Status check complete: 3 services checked
-[GIN] 2026/02/02 - 12:18:10 | 200 |      16.344µs |   192.168.1.150 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:18:10 | 200 |      18.772µs |   192.168.1.150 | GET      "/api/status"
+2026/02/02 12:22:49 Status check complete: 3 services checked
+[GIN] 2026/02/02 - 12:22:50 | 200 |     372.189µs |       127.0.0.1 | GET      "/"
+[GIN] 2026/02/02 - 12:22:54 | 200 |     148.223µs |     192.168.1.5 | GET      "/api/status"
+[GIN] 2026/02/02 - 12:22:54 | 200 |      19.434µs |     192.168.1.5 | GET      "/api/status"
