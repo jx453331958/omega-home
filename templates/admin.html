@@ -1,5 +1,577 @@
 <!DOCTYPE html>
-<html>
-<head><title>Admin</title></head>
-<body><h1>Admin - placeholder</h1></body>
+<html lang="zh-CN" x-data="admin()" x-init="init()">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omega Home - 管理后台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Login -->
+    <div x-show="!token" class="min-h-screen flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm">
+            <h1 class="text-2xl font-bold text-center mb-6">🏠 Omega Home</h1>
+            <p class="text-gray-500 text-center mb-6">管理后台登录</p>
+            <form @submit.prevent="login()">
+                <input type="password" x-model="password" placeholder="请输入管理密码"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <p x-show="loginError" class="text-red-500 text-sm mb-4" x-text="loginError"></p>
+                <button type="submit" class="w-full bg-indigo-600 text-white rounded-lg py-3 font-medium hover:bg-indigo-700 transition-colors">
+                    登录
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div x-show="token" x-cloak class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl">🏠</span>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Omega Home</h1>
+                    <p class="text-gray-500 text-sm">管理后台</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/" class="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors">← 返回首页</a>
+                <button @click="logout()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">退出登录</button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-1 mb-6 bg-gray-200 rounded-lg p-1">
+            <template x-for="t in tabs" :key="t.key">
+                <button @click="tab = t.key"
+                    class="flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                    :class="tab === t.key ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                    x-text="t.label"></button>
+            </template>
+        </div>
+
+        <!-- Services Tab -->
+        <div x-show="tab === 'services'" class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-lg font-semibold">服务管理</h2>
+                <button @click="openServiceModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm">+ 添加服务</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-3 px-2 text-gray-500 font-medium">图标</th>
+                            <th class="text-left py-3 px-2 text-gray-500 font-medium">名称</th>
+                            <th class="text-left py-3 px-2 text-gray-500 font-medium">URL</th>
+                            <th class="text-left py-3 px-2 text-gray-500 font-medium">分组</th>
+                            <th class="text-left py-3 px-2 text-gray-500 font-medium">排序</th>
+                            <th class="text-left py-3 px-2 text-gray-500 font-medium">状态检测</th>
+                            <th class="text-right py-3 px-2 text-gray-500 font-medium">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="s in servicesList" :key="s.id">
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="py-3 px-2" x-text="s.icon || '🌐'"></td>
+                                <td class="py-3 px-2 font-medium" x-text="s.name"></td>
+                                <td class="py-3 px-2 text-gray-500 max-w-[200px] truncate" x-text="s.url"></td>
+                                <td class="py-3 px-2 text-gray-500" x-text="getGroupName(s.group_id)"></td>
+                                <td class="py-3 px-2 text-gray-500" x-text="s.sort_order"></td>
+                                <td class="py-3 px-2">
+                                    <span class="w-2 h-2 rounded-full inline-block" :class="s.status_check ? 'bg-green-400' : 'bg-gray-300'"></span>
+                                </td>
+                                <td class="py-3 px-2 text-right">
+                                    <button @click="openServiceModal(s)" class="text-indigo-600 hover:text-indigo-800 mr-2">编辑</button>
+                                    <button @click="deleteService(s.id)" class="text-red-500 hover:text-red-700">删除</button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+                <p x-show="servicesList.length === 0" class="text-center text-gray-400 py-8">暂无服务</p>
+            </div>
+        </div>
+
+        <!-- Groups Tab -->
+        <div x-show="tab === 'groups'" class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-lg font-semibold">分组管理</h2>
+                <button @click="openGroupModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm">+ 添加分组</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-3 px-2 text-gray-500 font-medium">图标</th>
+                            <th class="text-left py-3 px-2 text-gray-500 font-medium">名称</th>
+                            <th class="text-left py-3 px-2 text-gray-500 font-medium">列数</th>
+                            <th class="text-left py-3 px-2 text-gray-500 font-medium">排序</th>
+                            <th class="text-right py-3 px-2 text-gray-500 font-medium">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="g in groupsList" :key="g.id">
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="py-3 px-2" x-text="g.icon || '📁'"></td>
+                                <td class="py-3 px-2 font-medium" x-text="g.name"></td>
+                                <td class="py-3 px-2 text-gray-500" x-text="g.columns"></td>
+                                <td class="py-3 px-2 text-gray-500" x-text="g.sort_order"></td>
+                                <td class="py-3 px-2 text-right">
+                                    <button @click="openGroupModal(g)" class="text-indigo-600 hover:text-indigo-800 mr-2">编辑</button>
+                                    <button @click="deleteGroup(g.id)" class="text-red-500 hover:text-red-700">删除</button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+                <p x-show="groupsList.length === 0" class="text-center text-gray-400 py-8">暂无分组</p>
+            </div>
+        </div>
+
+        <!-- Bookmarks Tab -->
+        <div x-show="tab === 'bookmarks'" class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-lg font-semibold">书签管理</h2>
+                <button @click="openBookmarkModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm">+ 添加书签</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-3 px-2 text-gray-500 font-medium">图标</th>
+                            <th class="text-left py-3 px-2 text-gray-500 font-medium">名称</th>
+                            <th class="text-left py-3 px-2 text-gray-500 font-medium">URL</th>
+                            <th class="text-left py-3 px-2 text-gray-500 font-medium">排序</th>
+                            <th class="text-right py-3 px-2 text-gray-500 font-medium">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="b in bookmarksList" :key="b.id">
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="py-3 px-2" x-text="b.icon || '🔗'"></td>
+                                <td class="py-3 px-2 font-medium" x-text="b.name"></td>
+                                <td class="py-3 px-2 text-gray-500 max-w-[200px] truncate" x-text="b.url"></td>
+                                <td class="py-3 px-2 text-gray-500" x-text="b.sort_order"></td>
+                                <td class="py-3 px-2 text-right">
+                                    <button @click="openBookmarkModal(b)" class="text-indigo-600 hover:text-indigo-800 mr-2">编辑</button>
+                                    <button @click="deleteBookmark(b.id)" class="text-red-500 hover:text-red-700">删除</button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+                <p x-show="bookmarksList.length === 0" class="text-center text-gray-400 py-8">暂无书签</p>
+            </div>
+        </div>
+
+        <!-- Appearance Tab -->
+        <div x-show="tab === 'appearance'" class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold mb-6">外观设置</h2>
+            <div class="space-y-5 max-w-lg">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">站点标题</label>
+                    <input type="text" x-model="settingsForm.title" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">副标题</label>
+                    <input type="text" x-model="settingsForm.subtitle" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">主题</label>
+                    <select x-model="settingsForm.theme" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="indigo-purple">靛蓝紫</option>
+                        <option value="dark-space">深空黑</option>
+                        <option value="emerald">翠绿</option>
+                        <option value="warm-orange">暖橙</option>
+                        <option value="aurora">极光</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">页脚文字</label>
+                    <input type="text" x-model="settingsForm.footer_text" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Logo（上传或URL）</label>
+                    <div class="flex gap-2">
+                        <input type="text" x-model="settingsForm.logo" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="图片URL">
+                        <label class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer text-sm flex items-center">
+                            上传
+                            <input type="file" accept="image/*" class="hidden" @change="uploadImage($event, 'logo')">
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">背景图片（上传或URL）</label>
+                    <div class="flex gap-2">
+                        <input type="text" x-model="settingsForm.background_image" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="图片URL">
+                        <label class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer text-sm flex items-center">
+                            上传
+                            <input type="file" accept="image/*" class="hidden" @change="uploadImage($event, 'background_image')">
+                        </label>
+                    </div>
+                </div>
+                <button @click="saveSettings()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存设置</button>
+                <p x-show="settingsSaved" x-transition class="text-green-600 text-sm">已保存</p>
+            </div>
+        </div>
+
+        <!-- Components Tab -->
+        <div x-show="tab === 'components'" class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold mb-6">组件设置</h2>
+            <div class="space-y-5 max-w-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-medium text-gray-900">搜索栏</p>
+                        <p class="text-gray-500 text-sm">在首页显示搜索栏</p>
+                    </div>
+                    <button @click="settingsForm.search_enabled = settingsForm.search_enabled === 'true' ? 'false' : 'true'"
+                        class="w-12 h-6 rounded-full transition-colors relative"
+                        :class="settingsForm.search_enabled === 'true' ? 'bg-indigo-600' : 'bg-gray-300'">
+                        <span class="absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform"
+                            :class="settingsForm.search_enabled === 'true' ? 'translate-x-6' : 'translate-x-0.5'"></span>
+                    </button>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-medium text-gray-900">时钟</p>
+                        <p class="text-gray-500 text-sm">在首页显示实时时钟</p>
+                    </div>
+                    <button @click="settingsForm.clock_enabled = settingsForm.clock_enabled === 'true' ? 'false' : 'true'"
+                        class="w-12 h-6 rounded-full transition-colors relative"
+                        :class="settingsForm.clock_enabled === 'true' ? 'bg-indigo-600' : 'bg-gray-300'">
+                        <span class="absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform"
+                            :class="settingsForm.clock_enabled === 'true' ? 'translate-x-6' : 'translate-x-0.5'"></span>
+                    </button>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-medium text-gray-900">问候语</p>
+                        <p class="text-gray-500 text-sm">根据时间显示问候语</p>
+                    </div>
+                    <button @click="settingsForm.greeting_enabled = settingsForm.greeting_enabled === 'true' ? 'false' : 'true'"
+                        class="w-12 h-6 rounded-full transition-colors relative"
+                        :class="settingsForm.greeting_enabled === 'true' ? 'bg-indigo-600' : 'bg-gray-300'">
+                        <span class="absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform"
+                            :class="settingsForm.greeting_enabled === 'true' ? 'translate-x-6' : 'translate-x-0.5'"></span>
+                    </button>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-medium text-gray-900">天气</p>
+                        <p class="text-gray-500 text-sm">在首页显示天气信息</p>
+                    </div>
+                    <button @click="settingsForm.weather_enabled = settingsForm.weather_enabled === 'true' ? 'false' : 'true'"
+                        class="w-12 h-6 rounded-full transition-colors relative"
+                        :class="settingsForm.weather_enabled === 'true' ? 'bg-indigo-600' : 'bg-gray-300'">
+                        <span class="absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform"
+                            :class="settingsForm.weather_enabled === 'true' ? 'translate-x-6' : 'translate-x-0.5'"></span>
+                    </button>
+                </div>
+                <button @click="saveSettings()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存设置</button>
+                <p x-show="settingsSaved" x-transition class="text-green-600 text-sm">已保存</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Modal -->
+    <div x-show="showServiceModal" x-transition class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showServiceModal = false">
+        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+            <h3 class="text-lg font-semibold mb-4" x-text="editingService.id ? '编辑服务' : '添加服务'"></h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">名称 *</label>
+                    <input type="text" x-model="editingService.name" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">URL *</label>
+                    <input type="url" x-model="editingService.url" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">图标（emoji 或 URL）</label>
+                    <input type="text" x-model="editingService.icon" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="🌐">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">描述</label>
+                    <input type="text" x-model="editingService.description" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">分组</label>
+                    <select x-model.number="editingService.group_id" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="0">无分组</option>
+                        <template x-for="g in groupsList" :key="g.id">
+                            <option :value="g.id" x-text="g.name"></option>
+                        </template>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">排序</label>
+                        <input type="number" x-model.number="editingService.sort_order" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">打开方式</label>
+                        <select x-model="editingService.target" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="_blank">新标签页</option>
+                            <option value="_self">当前页</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" x-model="editingService.status_check" id="status_check" class="rounded">
+                    <label for="status_check" class="text-sm text-gray-700">启用状态检测</label>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button @click="showServiceModal = false" class="px-4 py-2 text-gray-600 hover:text-gray-900">取消</button>
+                <button @click="saveService()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Group Modal -->
+    <div x-show="showGroupModal" x-transition class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showGroupModal = false">
+        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+            <h3 class="text-lg font-semibold mb-4" x-text="editingGroup.id ? '编辑分组' : '添加分组'"></h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">名称 *</label>
+                    <input type="text" x-model="editingGroup.name" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">图标（emoji）</label>
+                    <input type="text" x-model="editingGroup.icon" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="📁">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">列数</label>
+                        <select x-model.number="editingGroup.columns" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="1">1 列</option>
+                            <option value="2">2 列</option>
+                            <option value="3">3 列</option>
+                            <option value="4">4 列</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">排序</label>
+                        <input type="number" x-model.number="editingGroup.sort_order" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button @click="showGroupModal = false" class="px-4 py-2 text-gray-600 hover:text-gray-900">取消</button>
+                <button @click="saveGroup()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bookmark Modal -->
+    <div x-show="showBookmarkModal" x-transition class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showBookmarkModal = false">
+        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+            <h3 class="text-lg font-semibold mb-4" x-text="editingBookmark.id ? '编辑书签' : '添加书签'"></h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">名称 *</label>
+                    <input type="text" x-model="editingBookmark.name" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">URL *</label>
+                    <input type="url" x-model="editingBookmark.url" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">图标（emoji）</label>
+                    <input type="text" x-model="editingBookmark.icon" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="🔗">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">排序</label>
+                    <input type="number" x-model.number="editingBookmark.sort_order" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button @click="showBookmarkModal = false" class="px-4 py-2 text-gray-600 hover:text-gray-900">取消</button>
+                <button @click="saveBookmark()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function admin() {
+        return {
+            token: localStorage.getItem('omega_token') || '',
+            password: '',
+            loginError: '',
+            tab: 'services',
+            tabs: [
+                { key: 'services', label: '服务管理' },
+                { key: 'groups', label: '分组管理' },
+                { key: 'bookmarks', label: '书签管理' },
+                { key: 'appearance', label: '外观设置' },
+                { key: 'components', label: '组件设置' },
+            ],
+            servicesList: [],
+            groupsList: [],
+            bookmarksList: [],
+            settingsForm: {},
+            settingsSaved: false,
+
+            showServiceModal: false,
+            showGroupModal: false,
+            showBookmarkModal: false,
+            editingService: {},
+            editingGroup: {},
+            editingBookmark: {},
+
+            async init() {
+                if (this.token) {
+                    await this.loadAll();
+                }
+            },
+
+            async login() {
+                this.loginError = '';
+                try {
+                    const res = await fetch('/api/admin/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password: this.password }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) { this.loginError = data.error || '登录失败'; return; }
+                    this.token = data.token;
+                    localStorage.setItem('omega_token', data.token);
+                    await this.loadAll();
+                } catch(e) { this.loginError = '网络错误'; }
+            },
+
+            logout() {
+                this.token = '';
+                localStorage.removeItem('omega_token');
+            },
+
+            headers() {
+                return {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + this.token,
+                };
+            },
+
+            async api(method, url, body) {
+                const opts = { method, headers: this.headers() };
+                if (body) opts.body = JSON.stringify(body);
+                const res = await fetch(url, opts);
+                if (res.status === 401) { this.logout(); return null; }
+                return res.json();
+            },
+
+            async loadAll() {
+                const [services, groups, bookmarks, settings] = await Promise.all([
+                    this.api('GET', '/api/admin/services'),
+                    this.api('GET', '/api/admin/groups'),
+                    this.api('GET', '/api/admin/bookmarks'),
+                    this.api('GET', '/api/admin/settings'),
+                ]);
+                this.servicesList = services || [];
+                this.groupsList = groups || [];
+                this.bookmarksList = bookmarks || [];
+                this.settingsForm = settings || {};
+            },
+
+            getGroupName(id) {
+                const g = this.groupsList.find(g => g.id === id);
+                return g ? g.name : '-';
+            },
+
+            // Services
+            openServiceModal(s) {
+                this.editingService = s ? { ...s } : { name: '', url: '', icon: '', description: '', group_id: 0, sort_order: 0, target: '_blank', status_check: true };
+                this.showServiceModal = true;
+            },
+            async saveService() {
+                const s = this.editingService;
+                if (!s.name || !s.url) return;
+                if (s.id) {
+                    await this.api('PUT', '/api/admin/services/' + s.id, s);
+                } else {
+                    await this.api('POST', '/api/admin/services', s);
+                }
+                this.showServiceModal = false;
+                this.servicesList = await this.api('GET', '/api/admin/services') || [];
+            },
+            async deleteService(id) {
+                if (!confirm('确定删除？')) return;
+                await this.api('DELETE', '/api/admin/services/' + id);
+                this.servicesList = await this.api('GET', '/api/admin/services') || [];
+            },
+
+            // Groups
+            openGroupModal(g) {
+                this.editingGroup = g ? { ...g } : { name: '', icon: '', columns: 3, sort_order: 0 };
+                this.showGroupModal = true;
+            },
+            async saveGroup() {
+                const g = this.editingGroup;
+                if (!g.name) return;
+                if (g.id) {
+                    await this.api('PUT', '/api/admin/groups/' + g.id, g);
+                } else {
+                    await this.api('POST', '/api/admin/groups', g);
+                }
+                this.showGroupModal = false;
+                this.groupsList = await this.api('GET', '/api/admin/groups') || [];
+            },
+            async deleteGroup(id) {
+                if (!confirm('确定删除？')) return;
+                await this.api('DELETE', '/api/admin/groups/' + id);
+                this.groupsList = await this.api('GET', '/api/admin/groups') || [];
+            },
+
+            // Bookmarks
+            openBookmarkModal(b) {
+                this.editingBookmark = b ? { ...b } : { name: '', url: '', icon: '', sort_order: 0 };
+                this.showBookmarkModal = true;
+            },
+            async saveBookmark() {
+                const b = this.editingBookmark;
+                if (!b.name || !b.url) return;
+                if (b.id) {
+                    await this.api('PUT', '/api/admin/bookmarks/' + b.id, b);
+                } else {
+                    await this.api('POST', '/api/admin/bookmarks', b);
+                }
+                this.showBookmarkModal = false;
+                this.bookmarksList = await this.api('GET', '/api/admin/bookmarks') || [];
+            },
+            async deleteBookmark(id) {
+                if (!confirm('确定删除？')) return;
+                await this.api('DELETE', '/api/admin/bookmarks/' + id);
+                this.bookmarksList = await this.api('GET', '/api/admin/bookmarks') || [];
+            },
+
+            // Settings
+            async saveSettings() {
+                await this.api('PUT', '/api/admin/settings', this.settingsForm);
+                this.settingsSaved = true;
+                setTimeout(() => this.settingsSaved = false, 2000);
+            },
+
+            // Upload
+            async uploadImage(event, field) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('file', file);
+                const res = await fetch('/api/admin/upload', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + this.token },
+                    body: formData,
+                });
+                const data = await res.json();
+                if (data.url) {
+                    this.settingsForm[field] = data.url;
+                }
+            },
+        };
+    }
+    </script>
+</body>
 </html>
