@@ -77,6 +77,8 @@ func main() {
 
 		admin.POST("/upload", handlers.UploadImage)
 
+		admin.GET("/fetch-meta", handlers.FetchMeta)
+
 		admin.POST("/change-password", authHandler.ChangePassword)
 	}
 

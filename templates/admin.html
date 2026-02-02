@@ -304,11 +304,20 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">URL *</label>
-                    <input type="url" x-model="editingService.url" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div class="flex gap-2">
+                        <input type="url" x-model="editingService.url" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button @click="fetchMeta()" :disabled="fetchingMeta || !editingService.url" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap">
+                            <span x-show="!fetchingMeta">自动获取</span>
+                            <span x-show="fetchingMeta">获取中...</span>
+                        </button>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">图标（emoji 或 URL）</label>
-                    <input type="text" x-model="editingService.icon" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="🌐">
+                    <div class="flex gap-2 items-center">
+                        <input type="text" x-model="editingService.icon" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="🌐">
+                        <img x-show="editingService.icon && (editingService.icon.startsWith('http://') || editingService.icon.startsWith('https://'))" :src="editingService.icon" class="w-6 h-6 object-contain" alt="preview">
+                    </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">描述</label>
@@ -444,6 +453,7 @@
             editingService: {},
             editingGroup: {},
             editingBookmark: {},
+            fetchingMeta: false,
 
             async init() {
                 if (this.token) {
@@ -624,6 +634,34 @@
                 const data = await res.json();
                 if (data.url) {
                     this.settingsForm[field] = data.url;
+                }
+            },
+
+            // Fetch metadata
+            async fetchMeta() {
+                if (!this.editingService.url) return;
+                this.fetchingMeta = true;
+                try {
+                    const res = await fetch('/api/admin/fetch-meta?url=' + encodeURIComponent(this.editingService.url), {
+                        method: 'GET',
+                        headers: { 'Authorization': 'Bearer ' + this.token },
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        // Only fill empty fields
+                        if (!this.editingService.icon && data.icon) {
+                            this.editingService.icon = data.icon;
+                        }
+                        if (!this.editingService.description && data.description) {
+                            this.editingService.description = data.description;
+                        }
+                    } else {
+                        alert('获取失败: ' + (data.error || '未知错误'));
+                    }
+                } catch(e) {
+                    alert('网络错误');
+                } finally {
+                    this.fetchingMeta = false;
                 }
             },
         };
