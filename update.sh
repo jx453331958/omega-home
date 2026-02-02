@@ -6,9 +6,9 @@ cd "$(dirname "$0")"
 echo "🔄 Pulling latest changes..."
 git pull origin main
 
-echo "🚀 Rebuilding and restarting..."
-docker compose down
-docker compose up -d --build
+echo "🚀 Rebuilding (with cache)..."
+DOCKER_BUILDKIT=1 docker compose build
+docker compose up -d
 
-echo "✅ Updated and running."
+echo "✅ Done."
 docker compose ps
