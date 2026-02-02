@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"crypto/rand"
-	"fmt"
 	"log"
 	"math/big"
 	"net/http"
@@ -114,26 +113,40 @@ func InitAdminPassword(db *gorm.DB) (PasswordLookup, PasswordUpdate) {
 		return db.Where("key = ?", "admin_password_hash").Assign(Setting{Value: hash}).FirstOrCreate(&Setting{Key: "admin_password_hash"}).Error
 	}
 
+	// Determine initial/default password
+	var defaultPassword string
+	if envPw := os.Getenv("ADMIN_PASSWORD"); envPw != "" {
+		defaultPassword = envPw
+	} else {
+		defaultPassword = generateRandomPassword(12)
+	}
+
 	// Check if hash already exists
 	var s Setting
 	err := db.Where("key = ?", "admin_password_hash").First(&s).Error
 	if err == nil && s.Value != "" {
-		// Password already in DB, nothing to do
+		// Password already in DB - check if it matches default
+		if bcrypt.CompareHashAndPassword([]byte(s.Value), []byte(defaultPassword)) == nil {
+			// Still using default password, show it
+			log.Println("========================================")
+			log.Printf("🔑 Admin password: %s", defaultPassword)
+			log.Println("   (default, please change it in admin panel)")
+			log.Println("========================================")
+		} else {
+			log.Println("========================================")
+			log.Println("🔒 Admin password has been customized")
+			log.Println("   Reset by setting ADMIN_PASSWORD env or deleting admin_password_hash from DB")
+			log.Println("========================================")
+		}
 		return lookup, update
 	}
 
-	// Determine initial password
-	var plainPassword string
-	if envPw := os.Getenv("ADMIN_PASSWORD"); envPw != "" {
-		plainPassword = envPw
-	} else {
-		plainPassword = generateRandomPassword(12)
-		fmt.Println("========================================")
-		fmt.Printf("🔑 Initial admin password: %s\n", plainPassword)
-		fmt.Println("========================================")
-	}
+	// First launch - set default password
+	log.Println("========================================")
+	log.Printf("🔑 Initial admin password: %s", defaultPassword)
+	log.Println("========================================")
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(plainPassword), bcrypt.DefaultCost)
+	hash, err := bcrypt.GenerateFromPassword([]byte(defaultPassword), bcrypt.DefaultCost)
 	if err != nil {
 		log.Fatalf("Failed to hash admin password: %v", err)
 	}
