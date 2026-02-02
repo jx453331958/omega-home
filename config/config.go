@@ -14,7 +14,7 @@ func Load() *Config {
 	c := &Config{
 		Port:          getEnv("PORT", "3000"),
 		AdminPassword: getEnv("ADMIN_PASSWORD", "admin"),
-		DatabaseURL:   getEnv("DATABASE_URL", "sqlite:///data/omega.db"),
+		DatabaseURL:   getEnv("DATABASE_URL", "sqlite://data/omega.db"),
 		SecretKey:     getEnv("SECRET_KEY", "change-me-to-random"),
 		CheckInterval: 60,
 	}
