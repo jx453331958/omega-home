@@ -28,11 +28,16 @@
 [GIN-debug] GET    /api/admin/settings       --> omega-home/handlers.GetSettings (4 handlers)
 [GIN-debug] PUT    /api/admin/settings       --> omega-home/handlers.UpdateSettings (4 handlers)
 [GIN-debug] POST   /api/admin/upload         --> omega-home/handlers.UploadImage (4 handlers)
-2026/02/02 12:22:49 Omega Home starting on port 3000
+2026/02/02 12:38:30 Omega Home starting on port 8000
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.
-[GIN-debug] Listening and serving HTTP on :3000
-2026/02/02 12:22:49 Status check complete: 3 services checked
-[GIN] 2026/02/02 - 12:22:50 | 200 |     372.189µs |       127.0.0.1 | GET      "/"
-[GIN] 2026/02/02 - 12:22:54 | 200 |     148.223µs |     192.168.1.5 | GET      "/api/status"
-[GIN] 2026/02/02 - 12:22:54 | 200 |      19.434µs |     192.168.1.5 | GET      "/api/status"
+[GIN-debug] Listening and serving HTTP on :8000
+[GIN] 2026/02/02 - 12:38:30 | 200 |    2.385825ms |   192.168.1.150 | GET      "/admin"
+2026/02/02 12:38:30 Status check complete: 7 services checked
+[GIN] 2026/02/02 - 12:38:32 | 200 |     437.734µs |   192.168.1.150 | GET      "/"
+[GIN] 2026/02/02 - 12:38:35 | 200 |     160.964µs |   192.168.1.150 | GET      "/"
+[GIN] 2026/02/02 - 12:38:35 | 200 |    4.330208ms |   192.168.1.150 | GET      "/static/tailwind.css"
+[GIN] 2026/02/02 - 12:38:35 | 200 |    1.971181ms |   192.168.1.150 | GET      "/api/config"
+[GIN] 2026/02/02 - 12:38:35 | 200 |     897.856µs |   192.168.1.150 | GET      "/api/config"
+[GIN] 2026/02/02 - 12:38:35 | 200 |     116.107µs |   192.168.1.150 | GET      "/api/status"
+[GIN] 2026/02/02 - 12:38:35 | 200 |      33.351µs |   192.168.1.150 | GET      "/api/status"

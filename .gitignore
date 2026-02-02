@@ -4,3 +4,5 @@ omega-home
 /static/uploads/*
 !static/uploads/.gitkeep
 .env
+input.css
+tailwind.config.js
