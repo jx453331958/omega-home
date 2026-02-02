@@ -22,6 +22,10 @@ func main() {
 	cfg := config.Load()
 
 	models.InitDB(cfg.DatabaseURL)
+
+	// Initialize admin password (DB-backed)
+	lookup, update := handlers.InitAdminPassword(models.DB)
+
 	services.StartChecker(cfg.CheckInterval)
 
 	r := gin.Default()
@@ -40,7 +44,11 @@ func main() {
 	r.GET("/admin", handlers.AdminPage)
 
 	// Auth
-	authHandler := &handlers.AuthHandler{Password: cfg.AdminPassword, Secret: cfg.SecretKey}
+	authHandler := &handlers.AuthHandler{
+		Secret:          cfg.SecretKey,
+		GetPasswordHash: lookup,
+		SetPasswordHash: update,
+	}
 	r.POST("/api/admin/login", authHandler.Login)
 
 	// Protected admin API
@@ -68,6 +76,8 @@ func main() {
 		admin.PUT("/settings", handlers.UpdateSettings)
 
 		admin.POST("/upload", handlers.UploadImage)
+
+		admin.POST("/change-password", authHandler.ChangePassword)
 	}
 
 	log.Printf("Omega Home starting on port %s", cfg.Port)
