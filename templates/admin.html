@@ -295,7 +295,7 @@
 
     <!-- Service Modal -->
     <div x-show="showServiceModal" x-transition class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showServiceModal = false">
-        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-xl">
             <h3 class="text-lg font-semibold mb-4" x-text="editingService.id ? '编辑服务' : '添加服务'"></h3>
             <div class="space-y-4">
                 <div>
@@ -304,8 +304,8 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">URL *</label>
-                    <div class="flex gap-2">
-                        <input type="url" x-model="editingService.url" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div class="flex flex-wrap sm:flex-nowrap gap-2">
+                        <input type="url" x-model="editingService.url" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <button @click="fetchMeta()" :disabled="fetchingMeta || !editingService.url" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap">
                             <span x-show="!fetchingMeta">自动获取</span>
                             <span x-show="fetchingMeta">获取中...</span>
