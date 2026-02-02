@@ -15,6 +15,39 @@
         .fade-delay-1 { animation-delay: 0.1s; }
         .fade-delay-2 { animation-delay: 0.2s; }
         .fade-delay-3 { animation-delay: 0.3s; }
+
+        /* Small groups container - masonry-like layout */
+        .small-groups-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 640px) {
+            .small-groups-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .small-groups-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Small group styling */
+        .small-group {
+            break-inside: avoid;
+        }
+
+        .small-group-header {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(255, 255, 255, 0.35);
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+        }
     </style>
 </head>
 <body class="min-h-screen transition-colors duration-500" :class="themeClass">
@@ -88,16 +121,11 @@
 
         <!-- Groups -->
         <main class="max-w-6xl mx-auto px-4 pb-12 space-y-8">
-            <template x-for="(group, gi) in filteredGroups" :key="group.id">
+            <!-- Large groups (4+ services) - Full width, responsive grid -->
+            <template x-for="(group, gi) in largeGroups" :key="group.id">
                 <section class="fade-in-up" :class="'fade-delay-' + (gi % 4)">
                     <h2 class="text-xs uppercase tracking-wider text-white/40 font-medium mb-4" x-text="group.name"></h2>
-                    <div class="grid gap-3"
-                        :class="{
-                            'grid-cols-1': true,
-                            'sm:grid-cols-2': Math.min(group.columns, group.services.length) >= 2,
-                            'md:grid-cols-3': Math.min(group.columns, group.services.length) >= 3,
-                            'lg:grid-cols-4': Math.min(group.columns, group.services.length) >= 4
-                        }">
+                    <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                         <template x-for="svc in group.services" :key="svc.id">
                             <a :href="svc.url" :target="svc.target || '_blank'"
                                 class="group block bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.06)] hover:border-white/[0.15] hover:bg-white/[0.05] transition-all duration-200 cursor-pointer">
@@ -124,6 +152,40 @@
                     </div>
                 </section>
             </template>
+
+            <!-- Small groups (1-3 services) - Compact multi-column layout -->
+            <div x-show="smallGroups.length > 0" class="small-groups-container fade-in-up">
+                <template x-for="group in smallGroups" :key="group.id">
+                    <div class="small-group">
+                        <h3 class="small-group-header" x-text="group.name"></h3>
+                        <div class="space-y-3">
+                            <template x-for="svc in group.services" :key="svc.id">
+                                <a :href="svc.url" :target="svc.target || '_blank'"
+                                    class="group block bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.06)] hover:border-white/[0.15] hover:bg-white/[0.05] transition-all duration-200 cursor-pointer">
+                                    <div class="flex items-center gap-3">
+                                        <template x-if="svc.icon && svc.icon.startsWith('http')">
+                                            <img :src="svc.icon" class="w-9 h-9 rounded-lg flex-shrink-0" alt="">
+                                        </template>
+                                        <template x-if="!svc.icon || !svc.icon.startsWith('http')">
+                                            <div class="w-9 h-9 rounded-lg bg-white/[0.06] flex items-center justify-center text-base flex-shrink-0" x-text="svc.icon || '·'"></div>
+                                        </template>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2">
+                                                <span class="font-medium text-white/90 text-sm" x-text="svc.name"></span>
+                                                <template x-if="svc.status_check && status[svc.id]">
+                                                    <span class="w-2 h-2 rounded-full flex-shrink-0"
+                                                        :class="status[svc.id].online ? 'bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]' : 'bg-red-500'"></span>
+                                                </template>
+                                            </div>
+                                            <p class="text-white/40 text-xs truncate" x-text="svc.description"></p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
 
             <div x-show="filteredGroups.length === 0 && !loading" class="text-center py-20">
                 <p class="text-white/30 text-sm" x-text="search ? '没有找到匹配的服务' : '暂无服务，请在管理后台添加'"></p>
@@ -179,6 +241,14 @@
                         (s.description && s.description.toLowerCase().includes(q))
                     )
                 })).filter(g => g.services.length > 0);
+            },
+
+            get largeGroups() {
+                return this.filteredGroups.filter(g => g.services.length >= 4);
+            },
+
+            get smallGroups() {
+                return this.filteredGroups.filter(g => g.services.length < 4);
             },
 
             async init() {
