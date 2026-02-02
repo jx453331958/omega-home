@@ -1,0 +1,6 @@
+omega-home
+*.db
+/data/
+/static/uploads/*
+!static/uploads/.gitkeep
+.env
