@@ -1,0 +1,6 @@
+omega-home
+*.db
+data/
+.git
+.env
+DESIGN.md

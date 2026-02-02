@@ -1,0 +1,18 @@
+services:
+  omega-home:
+    build: .
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///data/omega.db}
+      - SECRET_KEY=${SECRET_KEY:-change-me-to-random}
+      - CHECK_INTERVAL=${CHECK_INTERVAL:-60}
+    volumes:
+      - omega-data:/app/data
+      - omega-uploads:/app/static/uploads
+    restart: unless-stopped
+
+volumes:
+  omega-data:
+  omega-uploads:
