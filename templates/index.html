@@ -128,15 +128,15 @@
                     <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                         <template x-for="svc in group.services" :key="svc.id">
                             <a :href="svc.url" :target="svc.target || '_blank'"
-                                class="group block bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.06)] hover:border-white/[0.15] hover:bg-white/[0.05] transition-all duration-200 cursor-pointer">
-                                <div class="flex items-center gap-3">
+                                class="group block bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.06)] hover:border-white/[0.15] hover:bg-white/[0.05] transition-all duration-200 cursor-pointer overflow-hidden">
+                                <div class="flex items-start gap-3">
                                     <template x-if="svc.icon && svc.icon.startsWith('http')">
                                         <img :src="svc.icon" class="w-10 h-10 rounded-lg flex-shrink-0" alt="">
                                     </template>
                                     <template x-if="!svc.icon || !svc.icon.startsWith('http')">
                                         <div class="w-10 h-10 rounded-lg bg-white/[0.06] flex items-center justify-center text-lg flex-shrink-0" x-text="svc.icon || '·'"></div>
                                     </template>
-                                    <div class="flex-1 min-w-0">
+                                    <div class="flex-1 min-w-0 overflow-hidden">
                                         <div class="flex items-center gap-2">
                                             <span class="font-medium text-white/90 text-sm" x-text="svc.name"></span>
                                             <template x-if="svc.status_check && status[svc.id]">
@@ -161,15 +161,15 @@
                         <div class="space-y-3">
                             <template x-for="svc in group.services" :key="svc.id">
                                 <a :href="svc.url" :target="svc.target || '_blank'"
-                                    class="group block bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.06)] hover:border-white/[0.15] hover:bg-white/[0.05] transition-all duration-200 cursor-pointer">
-                                    <div class="flex items-center gap-3">
+                                    class="group block bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.06)] hover:border-white/[0.15] hover:bg-white/[0.05] transition-all duration-200 cursor-pointer overflow-hidden">
+                                    <div class="flex items-start gap-3">
                                         <template x-if="svc.icon && svc.icon.startsWith('http')">
                                             <img :src="svc.icon" class="w-9 h-9 rounded-lg flex-shrink-0" alt="">
                                         </template>
                                         <template x-if="!svc.icon || !svc.icon.startsWith('http')">
                                             <div class="w-9 h-9 rounded-lg bg-white/[0.06] flex items-center justify-center text-base flex-shrink-0" x-text="svc.icon || '·'"></div>
                                         </template>
-                                        <div class="flex-1 min-w-0">
+                                        <div class="flex-1 min-w-0 overflow-hidden">
                                             <div class="flex items-center gap-2">
                                                 <span class="font-medium text-white/90 text-sm" x-text="svc.name"></span>
                                                 <template x-if="svc.status_check && status[svc.id]">
