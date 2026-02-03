@@ -144,7 +144,7 @@
                                                     :class="status[svc.id].online ? 'bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]' : 'bg-red-500'"></span>
                                             </template>
                                         </div>
-                                        <p class="text-white/40 text-sm overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.5;" :title="svc.description" x-text="svc.description"></p>
+                                        <p class="text-white/40 text-sm overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.5; max-height: 3em;" :title="svc.description" x-text="svc.description"></p>
                                     </div>
                                 </div>
                             </a>
@@ -177,7 +177,7 @@
                                                         :class="status[svc.id].online ? 'bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]' : 'bg-red-500'"></span>
                                                 </template>
                                             </div>
-                                            <p class="text-white/40 text-xs overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.5;" :title="svc.description" x-text="svc.description"></p>
+                                            <p class="text-white/40 text-xs overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.5; max-height: 3em;" :title="svc.description" x-text="svc.description"></p>
                                         </div>
                                     </div>
                                 </a>
