@@ -35,7 +35,17 @@ func FetchMeta(c *gin.Context) {
 		Timeout: 5 * time.Second,
 	}
 
-	resp, err := client.Get(targetURL)
+	req, err := http.NewRequest("GET", targetURL, nil)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"error": "failed to create request: " + err.Error()})
+		return
+	}
+
+	// Add browser-like headers to avoid 403 Forbidden
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+	req.Header.Set("Accept", "text/html,application/xhtml+xml")
+
+	resp, err := client.Do(req)
 	if err != nil {
 		c.JSON(http.StatusBadGateway, gin.H{"error": "failed to fetch url: " + err.Error()})
 		return
