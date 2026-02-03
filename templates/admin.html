@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Omega Home - 管理后台</title>
     <link rel="stylesheet" href="/static/tailwind.css">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -305,20 +306,26 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">URL *</label>
                     <input type="url" x-model="editingService.url" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <button @click="fetchMeta()" :disabled="fetchingMeta || !editingService.url" class="mt-2 w-full px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        <span x-show="!fetchingMeta">🔍 自动获取图标和描述</span>
-                        <span x-show="fetchingMeta">获取中...</span>
-                    </button>
                 </div>
-                <div>
+                <div x-data="{ showEmojiPicker: false }">
                     <label class="block text-sm font-medium text-gray-700 mb-1">图标（emoji 或 URL）</label>
-                    <div class="flex gap-2 items-center">
-                        <input type="text" x-model="editingService.icon" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="🌐">
+                    <div class="flex gap-2 items-center relative">
+                        <input type="text" x-model="editingService.icon" @focus="showEmojiPicker = false" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="🌐">
+                        <button type="button" @click="showEmojiPicker = !showEmojiPicker" class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                            😀
+                        </button>
                         <img x-show="editingService.icon && (editingService.icon.startsWith('http://') || editingService.icon.startsWith('https://'))" :src="editingService.icon" class="w-6 h-6 object-contain" alt="preview">
                     </div>
+                    <div x-show="showEmojiPicker" @click.away="showEmojiPicker = false" class="absolute z-50 mt-1 shadow-xl rounded-lg" x-init="
+                        $nextTick(() => {
+                            const picker = document.createElement('emoji-picker');
+                            picker.addEventListener('emoji-click', (e) => {
+                                editingService.icon = e.detail.unicode;
+                                showEmojiPicker = false;
+                            });
+                            $el.appendChild(picker);
+                        })
+                    "></div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">描述</label>
@@ -454,7 +461,6 @@
             editingService: {},
             editingGroup: {},
             editingBookmark: {},
-            fetchingMeta: false,
 
             async init() {
                 if (this.token) {
@@ -635,34 +641,6 @@
                 const data = await res.json();
                 if (data.url) {
                     this.settingsForm[field] = data.url;
-                }
-            },
-
-            // Fetch metadata
-            async fetchMeta() {
-                if (!this.editingService.url) return;
-                this.fetchingMeta = true;
-                try {
-                    const res = await fetch('/api/admin/fetch-meta?url=' + encodeURIComponent(this.editingService.url), {
-                        method: 'GET',
-                        headers: { 'Authorization': 'Bearer ' + this.token },
-                    });
-                    const data = await res.json();
-                    if (res.ok) {
-                        // Only fill empty fields
-                        if (!this.editingService.icon && data.icon) {
-                            this.editingService.icon = data.icon;
-                        }
-                        if (!this.editingService.description && data.description) {
-                            this.editingService.description = data.description;
-                        }
-                    } else {
-                        alert('获取失败: ' + (data.error || '未知错误'));
-                    }
-                } catch(e) {
-                    alert('网络错误');
-                } finally {
-                    this.fetchingMeta = false;
                 }
             },
         };

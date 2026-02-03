@@ -3,7 +3,6 @@ module omega-home
 go 1.25.6
 
 require (
-	github.com/PuerkitoBio/goquery v1.11.0
 	github.com/gin-gonic/gin v1.11.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	golang.org/x/crypto v0.44.0
@@ -13,7 +12,6 @@ require (
 )
 
 require (
-	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/bytedance/sonic v1.14.0 // indirect
 	github.com/bytedance/sonic/loader v0.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
