@@ -335,7 +335,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen transition-colors duration-500 dot-grid" :class="themeClass">
+<body class="min-h-screen transition-colors duration-500 dot-grid" :style="themeStyle">
     <!-- Ambient scanline -->
     <div class="scanline"></div>
 
@@ -511,11 +511,11 @@
                 return '晚上好';
             },
 
-            get themeClass() {
+            get themeStyle() {
                 const themes = {
-                    'midnight': 'bg-[#0a0a0a]',
-                    'deep-blue': 'bg-gradient-to-br from-[#0a1628] to-[#0d1117]',
-                    'charcoal': 'bg-gradient-to-br from-[#18181b] to-[#09090b]',
+                    'midnight': 'background-color: #0a0a0a;',
+                    'deep-blue': 'background: linear-gradient(to bottom right, #0a1628, #0d1117);',
+                    'charcoal': 'background: linear-gradient(to bottom right, #18181b, #09090b);',
                 };
                 return themes[this.settings.theme] || themes['midnight'];
             },
