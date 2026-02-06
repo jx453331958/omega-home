@@ -213,7 +213,7 @@
         .small-groups-container {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 2rem;
+            gap: 0.75rem;
         }
         @media (min-width: 640px) {
             .small-groups-container { grid-template-columns: repeat(2, 1fr); }
@@ -408,7 +408,7 @@
 
         <!-- Groups -->
         <main style="max-width: 72rem; margin: 0 auto; padding: 0 1rem 3rem;">
-            <div style="display: flex; flex-direction: column; gap: 2.5rem;">
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
             <!-- Large groups (4+ services) -->
             <template x-for="(group, gi) in largeGroups" :key="group.id">
                 <section class="fade-in-up" :class="'fade-delay-' + (gi % 4)">
@@ -447,7 +447,7 @@
                 <template x-for="group in smallGroups" :key="group.id">
                     <div class="small-group">
                         <h3 class="small-group-header" x-text="group.name"></h3>
-                        <div style="display:flex;flex-direction:column;gap:10px;">
+                        <div style="display:flex;flex-direction:column;gap:0.75rem;">
                             <template x-for="svc in group.services" :key="svc.id">
                                 <a :href="svc.url" :target="svc.target || '_blank'" class="card-tech" style="display:block;padding:1rem;cursor:pointer;text-decoration:none;">
                                     <div style="display:flex;gap:12px;align-items:flex-start;">
