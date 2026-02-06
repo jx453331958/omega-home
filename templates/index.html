@@ -5,79 +5,367 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title x-text="settings.title || 'Omega Home'">Omega Home</title>
     <link rel="stylesheet" href="/static/tailwind.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        :root {
+            --accent-h: 185;
+            --accent-s: 80%;
+            --accent-l: 55%;
+            --accent: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+            --accent-dim: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.15);
+            --accent-glow: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.3);
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-hover: rgba(255, 255, 255, 0.06);
+            --border: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.14);
         }
-        .fade-in-up { animation: fadeInUp 0.4s ease-out forwards; opacity: 0; }
-        .fade-delay-1 { animation-delay: 0.1s; }
-        .fade-delay-2 { animation-delay: 0.2s; }
-        .fade-delay-3 { animation-delay: 0.3s; }
 
-        /* Small groups container - masonry-like layout */
+        * { font-family: 'Exo 2', system-ui, sans-serif; }
+        .font-mono-tech { font-family: 'JetBrains Mono', monospace; }
+
+        /* === Dot grid background === */
+        .dot-grid {
+            background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        /* === Animations === */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-8px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 4px rgba(34,197,94,0.4), 0 0 8px rgba(34,197,94,0.15); }
+            50% { box-shadow: 0 0 6px rgba(34,197,94,0.6), 0 0 14px rgba(34,197,94,0.25); }
+        }
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+        @keyframes borderGlow {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            opacity: 0;
+        }
+        .fade-delay-0 { animation-delay: 0.05s; }
+        .fade-delay-1 { animation-delay: 0.12s; }
+        .fade-delay-2 { animation-delay: 0.2s; }
+        .fade-delay-3 { animation-delay: 0.28s; }
+
+        .slide-in {
+            animation: slideIn 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            opacity: 0;
+        }
+
+        /* === Status indicator pulse === */
+        .status-online {
+            background: #22c55e;
+            animation: pulseGlow 2.4s ease-in-out infinite;
+        }
+        .status-offline {
+            background: #ef4444;
+            box-shadow: 0 0 4px rgba(239,68,68,0.3);
+        }
+
+        /* === Card system === */
+        .card-tech {
+            position: relative;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+            overflow: hidden;
+        }
+        .card-tech::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            padding: 1px;
+            background: linear-gradient(
+                135deg,
+                hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0) 0%,
+                hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0) 40%,
+                hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.12) 50%,
+                hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0) 60%,
+                hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0) 100%
+            );
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .card-tech:hover {
+            background: var(--surface-hover);
+            border-color: var(--border-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.05);
+        }
+        .card-tech:hover::before {
+            opacity: 1;
+        }
+
+        /* === Icon container === */
+        .icon-frame {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.06);
+            flex-shrink: 0;
+        }
+
+        /* === Search bar === */
+        .search-container {
+            position: relative;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .search-container:focus-within {
+            border-color: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.3);
+            box-shadow: 0 0 0 3px hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.08),
+                         0 0 20px hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.06);
+            background: rgba(255,255,255,0.05);
+        }
+        .search-container::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: 20%; right: 20%; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-dim), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .search-container:focus-within::before {
+            opacity: 1;
+        }
+
+        /* === Bookmark pills === */
+        .bookmark-pill {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            color: rgba(255,255,255,0.5);
+            font-size: 0.75rem;
+            transition: all 0.25s ease;
+            text-decoration: none;
+        }
+        .bookmark-pill:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.8);
+            transform: translateY(-1px);
+        }
+
+        /* === Group headers === */
+        .group-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: rgba(255,255,255,0.3);
+            margin-bottom: 1rem;
+        }
+        .group-label::before {
+            content: '';
+            display: block;
+            width: 12px;
+            height: 1px;
+            background: var(--accent);
+            opacity: 0.5;
+        }
+        .group-label::after {
+            content: '';
+            display: block;
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.08), transparent);
+        }
+
+        /* === Small groups === */
         .small-groups-container {
             display: grid;
             grid-template-columns: 1fr;
             gap: 2rem;
         }
-
         @media (min-width: 640px) {
-            .small-groups-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            .small-groups-container { grid-template-columns: repeat(2, 1fr); }
         }
-
         @media (min-width: 1024px) {
-            .small-groups-container {
-                grid-template-columns: repeat(3, 1fr);
-            }
+            .small-groups-container { grid-template-columns: repeat(3, 1fr); }
         }
-
-        /* Small group styling */
-        .small-group {
-            break-inside: avoid;
-        }
-
+        .small-group { break-inside: avoid; }
         .small-group-header {
-            font-size: 0.7rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.62rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: rgba(255, 255, 255, 0.35);
+            letter-spacing: 0.1em;
+            color: rgba(255, 255, 255, 0.28);
             font-weight: 500;
             margin-bottom: 0.75rem;
         }
+        .small-group-header::before {
+            content: '';
+            width: 8px;
+            height: 1px;
+            background: var(--accent);
+            opacity: 0.4;
+        }
+
+        /* === Ambient scanline (subtle) === */
+        .scanline {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 120px;
+            background: linear-gradient(180deg, transparent, hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.015), transparent);
+            pointer-events: none;
+            z-index: -1;
+            animation: scanline 8s linear infinite;
+        }
+
+        /* === Description clamp === */
+        .desc-clamp {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.5;
+            height: 3em;
+        }
+
+        /* === Clock styling === */
+        .clock-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.05em;
+            color: rgba(255,255,255,0.35);
+            font-size: 0.8rem;
+        }
+
+        /* === Top glow (themed) === */
+        .glow-midnight {
+            background: radial-gradient(ellipse 70% 40% at 50% -10%, hsla(var(--accent-h), 60%, 40%, 0.12), transparent);
+        }
+        .glow-blue {
+            background: radial-gradient(ellipse 70% 40% at 50% -10%, hsla(210, 70%, 30%, 0.18), transparent);
+        }
+        .glow-charcoal {
+            background: radial-gradient(ellipse 70% 40% at 50% -10%, hsla(var(--accent-h), 40%, 35%, 0.1), transparent);
+        }
+
+        /* === Theme toggle button === */
+        .toggle-btn {
+            padding: 8px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            color: rgba(255,255,255,0.4);
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+        .toggle-btn:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* === Empty state === */
+        .empty-state {
+            text-align: center;
+            padding: 5rem 0;
+            color: rgba(255,255,255,0.25);
+            font-size: 0.85rem;
+        }
+
+        /* === Footer === */
+        .footer-link {
+            color: rgba(255,255,255,0.18);
+            font-size: 0.7rem;
+            text-decoration: none;
+            transition: color 0.2s ease;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.03em;
+        }
+        .footer-link:hover {
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* === Logo glow === */
+        .logo-ring {
+            position: relative;
+        }
+        .logo-ring::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent-dim), transparent);
+            z-index: -1;
+            opacity: 0.5;
+        }
     </style>
 </head>
-<body class="min-h-screen transition-colors duration-500" :class="themeClass">
+<body class="min-h-screen transition-colors duration-500 dot-grid" :class="themeClass">
+    <!-- Ambient scanline -->
+    <div class="scanline"></div>
+
     <!-- Top ambient glow -->
-    <div class="fixed top-0 left-0 right-0 h-[600px] pointer-events-none -z-10"
-        style="background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120,119,198,0.15), transparent)"></div>
+    <div class="fixed top-0 left-0 right-0 h-[500px] pointer-events-none -z-10 glow-midnight"></div>
 
     <!-- Background overlay for custom image -->
     <div x-show="settings.background_image" class="fixed inset-0 bg-cover bg-center -z-10" :style="settings.background_image ? 'background-image: url(' + settings.background_image + ')' : ''"></div>
 
-    <div class="min-h-screen" :class="settings.background_image ? 'bg-black/40' : ''">
+    <div class="min-h-screen" :class="settings.background_image ? 'bg-black/50' : ''">
         <!-- Header -->
-        <header class="pt-8 pb-4 px-4">
-            <div class="max-w-6xl mx-auto flex items-center justify-between">
-                <div class="flex items-center gap-3">
+        <header style="padding: 2rem 1rem 1rem;">
+            <div style="max-width: 72rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 14px;">
                     <template x-if="settings.logo">
-                        <img :src="settings.logo" class="w-10 h-10 rounded-lg" alt="logo">
+                        <div class="logo-ring">
+                            <img :src="settings.logo" style="width: 38px; height: 38px; border-radius: 10px;" alt="logo">
+                        </div>
                     </template>
-                    <h1 class="text-xl font-bold text-white" x-text="settings.title || 'Omega Home'"></h1>
+                    <h1 style="font-size: 1.2rem; font-weight: 600; color: rgba(255,255,255,0.92); letter-spacing: -0.01em;" x-text="settings.title || 'Omega Home'"></h1>
                 </div>
-                <div class="flex items-center gap-4">
+                <div style="display: flex; align-items: center; gap: 16px;">
                     <!-- Clock -->
-                    <div x-show="settings.clock_enabled === 'true'" class="text-white/40 text-sm font-mono tabular-nums" x-text="clock"></div>
+                    <div x-show="settings.clock_enabled === 'true'" class="clock-display" x-text="clock"></div>
                     <!-- Theme toggle -->
-                    <button @click="darkMode = !darkMode; localStorage.setItem('darkMode', darkMode)"
-                        class="p-2 rounded-lg bg-white/5 border border-white/8 text-white/50 hover:bg-white/10 hover:text-white/80 transition-all duration-200">
-                        <svg x-show="!darkMode" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <button @click="darkMode = !darkMode; localStorage.setItem('darkMode', darkMode)" class="toggle-btn">
+                        <svg x-show="!darkMode" xmlns="http://www.w3.org/2000/svg" style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 006.002-2.082z" />
                         </svg>
-                        <svg x-show="darkMode" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <svg x-show="darkMode" xmlns="http://www.w3.org/2000/svg" style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
                         </svg>
                     </button>
@@ -85,21 +373,21 @@
             </div>
         </header>
 
-        <!-- Greeting (minimal) -->
-        <div x-show="settings.greeting_enabled === 'true'" class="max-w-6xl mx-auto px-4 pb-2">
-            <p class="text-white/30 text-sm" x-text="greeting"></p>
+        <!-- Greeting -->
+        <div x-show="settings.greeting_enabled === 'true'" style="max-width: 72rem; margin: 0 auto; padding: 0 1rem 0.5rem;">
+            <p style="color: rgba(255,255,255,0.28); font-size: 0.85rem; font-weight: 300;" x-text="greeting"></p>
         </div>
 
         <!-- Search bar -->
-        <div x-show="settings.search_enabled === 'true'" class="max-w-xl mx-auto px-4 pb-6">
-            <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 flex items-center gap-3 focus-within:border-white/20 focus-within:ring-1 focus-within:ring-white/10 transition-all duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white/30 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <div x-show="settings.search_enabled === 'true'" style="max-width: 36rem; margin: 0 auto; padding: 0 1rem 1.75rem;">
+            <div class="search-container" style="padding: 10px 18px; display: flex; align-items: center; gap: 12px;">
+                <svg xmlns="http://www.w3.org/2000/svg" style="width:15px;height:15px;color:rgba(255,255,255,0.25);flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                 </svg>
                 <input type="text" x-model="search" placeholder="搜索服务..."
-                    class="w-full bg-transparent text-white/90 placeholder-white/30 outline-none text-sm">
-                <button x-show="search" @click="search = ''" class="text-white/30 hover:text-white/60 transition-colors duration-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    style="width:100%;background:transparent;color:rgba(255,255,255,0.88);outline:none;font-size:0.85rem;font-family:'Exo 2',sans-serif;" class="placeholder-white/25">
+                <button x-show="search" @click="search = ''" style="color:rgba(255,255,255,0.3);transition:color 0.2s;" onmouseover="this.style.color='rgba(255,255,255,0.6)'" onmouseout="this.style.color='rgba(255,255,255,0.3)'">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
@@ -107,12 +395,11 @@
         </div>
 
         <!-- Bookmarks bar -->
-        <div x-show="bookmarks.length > 0" class="max-w-6xl mx-auto px-4 pb-6">
-            <div class="flex flex-wrap gap-2">
+        <div x-show="bookmarks.length > 0" style="max-width: 72rem; margin: 0 auto; padding: 0 1rem 1.75rem;">
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                 <template x-for="b in bookmarks" :key="b.id">
-                    <a :href="b.url" target="_blank"
-                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/[0.08] text-white/50 text-xs hover:bg-white/10 hover:text-white/70 transition-all duration-200">
-                        <span x-text="b.icon || ''" class="text-xs" x-show="b.icon"></span>
+                    <a :href="b.url" target="_blank" class="bookmark-pill">
+                        <span x-text="b.icon || ''" style="font-size: 0.75rem;" x-show="b.icon"></span>
                         <span x-text="b.name"></span>
                     </a>
                 </template>
@@ -120,31 +407,33 @@
         </div>
 
         <!-- Groups -->
-        <main class="max-w-6xl mx-auto px-4 pb-12 space-y-8">
-            <!-- Large groups (4+ services) - Full width, responsive grid -->
+        <main style="max-width: 72rem; margin: 0 auto; padding: 0 1rem 3rem;">
+            <div style="display: flex; flex-direction: column; gap: 2.5rem;">
+            <!-- Large groups (4+ services) -->
             <template x-for="(group, gi) in largeGroups" :key="group.id">
                 <section class="fade-in-up" :class="'fade-delay-' + (gi % 4)">
-                    <h2 class="text-xs uppercase tracking-wider text-white/40 font-medium mb-4" x-text="group.name"></h2>
+                    <div class="group-label">
+                        <span x-text="group.name"></span>
+                    </div>
                     <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                         <template x-for="svc in group.services" :key="svc.id">
-                            <a :href="svc.url" :target="svc.target || '_blank'"
-                                class="group block bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.06)] hover:border-white/[0.15] hover:bg-white/[0.05] transition-all duration-200 cursor-pointer" style="overflow: hidden;">
-                                <div class="flex gap-3" style="align-items: flex-start;">
+                            <a :href="svc.url" :target="svc.target || '_blank'" class="card-tech" style="display:block;padding:1.25rem;cursor:pointer;text-decoration:none;">
+                                <div style="display:flex;gap:14px;align-items:flex-start;">
                                     <template x-if="svc.icon && svc.icon.startsWith('http')">
-                                        <img :src="svc.icon" class="w-10 h-10 rounded-lg flex-shrink-0" alt="">
+                                        <img :src="svc.icon" style="width:42px;height:42px;border-radius:10px;flex-shrink:0;" alt="">
                                     </template>
                                     <template x-if="!svc.icon || !svc.icon.startsWith('http')">
-                                        <div class="w-10 h-10 rounded-lg bg-white/[0.06] flex items-center justify-center text-lg flex-shrink-0" x-text="svc.icon || '·'"></div>
+                                        <div class="icon-frame" style="width:42px;height:42px;font-size:1.15rem;" x-text="svc.icon || '·'"></div>
                                     </template>
-                                    <div class="flex-1 min-w-0" style="overflow: hidden;">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-medium text-white/90 text-sm" x-text="svc.name"></span>
+                                    <div style="flex:1;min-width:0;overflow:hidden;">
+                                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                                            <span style="font-weight:500;color:rgba(255,255,255,0.88);font-size:0.88rem;" x-text="svc.name"></span>
                                             <template x-if="svc.status_check && status[svc.id]">
-                                                <span class="w-2 h-2 rounded-full flex-shrink-0"
-                                                    :class="status[svc.id].online ? 'bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]' : 'bg-red-500'"></span>
+                                                <span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;"
+                                                    :class="status[svc.id].online ? 'status-online' : 'status-offline'"></span>
                                             </template>
                                         </div>
-                                        <p class="text-white/40 text-sm" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5; height: 3em;" :title="svc.description" x-text="svc.description"></p>
+                                        <p class="desc-clamp" style="color:rgba(255,255,255,0.35);font-size:0.8rem;" :title="svc.description" x-text="svc.description"></p>
                                     </div>
                                 </div>
                             </a>
@@ -153,31 +442,30 @@
                 </section>
             </template>
 
-            <!-- Small groups (1-3 services) - Compact multi-column layout -->
+            <!-- Small groups (1-3 services) -->
             <div x-show="smallGroups.length > 0" class="small-groups-container fade-in-up">
                 <template x-for="group in smallGroups" :key="group.id">
                     <div class="small-group">
                         <h3 class="small-group-header" x-text="group.name"></h3>
-                        <div class="space-y-3">
+                        <div style="display:flex;flex-direction:column;gap:10px;">
                             <template x-for="svc in group.services" :key="svc.id">
-                                <a :href="svc.url" :target="svc.target || '_blank'"
-                                    class="group block bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.06)] hover:border-white/[0.15] hover:bg-white/[0.05] transition-all duration-200 cursor-pointer" style="overflow: hidden;">
-                                    <div class="flex gap-3" style="align-items: flex-start;">
+                                <a :href="svc.url" :target="svc.target || '_blank'" class="card-tech" style="display:block;padding:1rem;cursor:pointer;text-decoration:none;">
+                                    <div style="display:flex;gap:12px;align-items:flex-start;">
                                         <template x-if="svc.icon && svc.icon.startsWith('http')">
-                                            <img :src="svc.icon" class="w-9 h-9 rounded-lg flex-shrink-0" alt="">
+                                            <img :src="svc.icon" style="width:36px;height:36px;border-radius:9px;flex-shrink:0;" alt="">
                                         </template>
                                         <template x-if="!svc.icon || !svc.icon.startsWith('http')">
-                                            <div class="w-9 h-9 rounded-lg bg-white/[0.06] flex items-center justify-center text-base flex-shrink-0" x-text="svc.icon || '·'"></div>
+                                            <div class="icon-frame" style="width:36px;height:36px;font-size:1rem;" x-text="svc.icon || '·'"></div>
                                         </template>
-                                        <div class="flex-1 min-w-0" style="overflow: hidden;">
-                                            <div class="flex items-center gap-2">
-                                                <span class="font-medium text-white/90 text-sm" x-text="svc.name"></span>
+                                        <div style="flex:1;min-width:0;overflow:hidden;">
+                                            <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">
+                                                <span style="font-weight:500;color:rgba(255,255,255,0.88);font-size:0.84rem;" x-text="svc.name"></span>
                                                 <template x-if="svc.status_check && status[svc.id]">
-                                                    <span class="w-2 h-2 rounded-full flex-shrink-0"
-                                                        :class="status[svc.id].online ? 'bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]' : 'bg-red-500'"></span>
+                                                    <span style="width:6px;height:6px;border-radius:50%;flex-shrink:0;"
+                                                        :class="status[svc.id].online ? 'status-online' : 'status-offline'"></span>
                                                 </template>
                                             </div>
-                                            <p class="text-white/40 text-xs" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5; height: 3em;" :title="svc.description" x-text="svc.description"></p>
+                                            <p class="desc-clamp" style="color:rgba(255,255,255,0.35);font-size:0.75rem;" :title="svc.description" x-text="svc.description"></p>
                                         </div>
                                     </div>
                                 </a>
@@ -187,16 +475,17 @@
                 </template>
             </div>
 
-            <div x-show="filteredGroups.length === 0 && !loading" class="text-center py-20">
-                <p class="text-white/30 text-sm" x-text="search ? '没有找到匹配的服务' : '暂无服务，请在管理后台添加'"></p>
+            <div x-show="filteredGroups.length === 0 && !loading" class="empty-state">
+                <p x-text="search ? '没有找到匹配的服务' : '暂无服务，请在管理后台添加'"></p>
+            </div>
             </div>
         </main>
 
         <!-- Footer -->
-        <footer class="py-6 px-4">
-            <div class="max-w-6xl mx-auto flex items-center justify-between">
-                <span class="text-white/20 text-xs" x-text="settings.footer_text || 'Powered by Omega Home'"></span>
-                <a href="/admin" class="text-white/20 text-xs hover:text-white/40 transition-colors duration-200">管理</a>
+        <footer style="padding: 1.5rem 1rem 2rem;">
+            <div style="max-width: 72rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+                <span style="color:rgba(255,255,255,0.15);font-size:0.68rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.03em;" x-text="settings.footer_text || 'Powered by Omega Home'"></span>
+                <a href="/admin" class="footer-link">管理</a>
             </div>
         </footer>
     </div>
