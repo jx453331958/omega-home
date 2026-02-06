@@ -7,11 +7,18 @@
     <link rel="stylesheet" href="/static/tailwind.css">
     <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        /* Hide scrollbar on tab bar */
+        .tabs-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        .tabs-scroll::-webkit-scrollbar { display: none; }
+        /* Mobile card label */
+        .card-label { font-size: 0.7rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
     <!-- Login -->
-    <div x-show="!token" class="min-h-screen flex items-center justify-center">
-        <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm">
+    <div x-show="!token" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-sm">
             <h1 class="text-2xl font-bold text-center mb-6">🏠 Omega Home</h1>
             <p class="text-gray-500 text-center mb-6">管理后台登录</p>
             <form @submit.prevent="login()">
@@ -26,39 +33,40 @@
     </div>
 
     <!-- Admin Panel -->
-    <div x-show="token" x-cloak class="max-w-6xl mx-auto px-4 py-8">
+    <div x-show="token" x-cloak class="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <!-- Header -->
-        <div class="flex items-center justify-between mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8">
             <div class="flex items-center gap-3">
-                <span class="text-3xl">🏠</span>
+                <span class="text-2xl sm:text-3xl">🏠</span>
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Omega Home</h1>
-                    <p class="text-gray-500 text-sm">管理后台</p>
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Omega Home</h1>
+                    <p class="text-gray-500 text-xs sm:text-sm">管理后台</p>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <a href="/" class="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors">← 返回首页</a>
-                <button @click="logout()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">退出登录</button>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="/" class="px-3 py-1.5 sm:px-4 sm:py-2 text-gray-600 hover:text-gray-900 transition-colors text-sm">← 返回首页</a>
+                <button @click="logout()" class="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm">退出登录</button>
             </div>
         </div>
 
         <!-- Tabs -->
-        <div class="flex gap-1 mb-6 bg-gray-200 rounded-lg p-1">
+        <div class="tabs-scroll flex gap-1 mb-4 sm:mb-6 bg-gray-200 rounded-lg p-1 overflow-x-auto">
             <template x-for="t in tabs" :key="t.key">
                 <button @click="tab = t.key"
-                    class="flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                    class="flex-shrink-0 px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap"
                     :class="tab === t.key ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
                     x-text="t.label"></button>
             </template>
         </div>
 
         <!-- Services Tab -->
-        <div x-show="tab === 'services'" class="bg-white rounded-xl shadow-sm p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-lg font-semibold">服务管理</h2>
-                <button @click="openServiceModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm">+ 添加服务</button>
+        <div x-show="tab === 'services'" class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+            <div class="flex items-center justify-between mb-4 sm:mb-6">
+                <h2 class="text-base sm:text-lg font-semibold">服务管理</h2>
+                <button @click="openServiceModal()" class="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-xs sm:text-sm">+ 添加服务</button>
             </div>
-            <div class="overflow-x-auto">
+            <!-- Desktop table -->
+            <div class="hidden sm:block overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b border-gray-200">
@@ -90,17 +98,41 @@
                         </template>
                     </tbody>
                 </table>
-                <p x-show="servicesList.length === 0" class="text-center text-gray-400 py-8">暂无服务</p>
             </div>
+            <!-- Mobile cards -->
+            <div class="sm:hidden space-y-3">
+                <template x-for="s in servicesList" :key="s.id">
+                    <div class="border border-gray-200 rounded-lg p-3">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-xl" x-text="s.icon || '🌐'"></span>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-medium text-gray-900 text-sm" x-text="s.name"></p>
+                                <p class="text-gray-400 text-xs truncate" x-text="s.url"></p>
+                            </div>
+                            <span class="w-2 h-2 rounded-full flex-shrink-0" :class="s.status_check ? 'bg-green-400' : 'bg-gray-300'"></span>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs text-gray-500 mb-3">
+                            <span>分组: <span x-text="getGroupName(s.group_id)"></span></span>
+                            <span>排序: <span x-text="s.sort_order"></span></span>
+                        </div>
+                        <div class="flex gap-3 border-t border-gray-100 pt-2">
+                            <button @click="openServiceModal(s)" class="text-indigo-600 text-sm">编辑</button>
+                            <button @click="deleteService(s.id)" class="text-red-500 text-sm">删除</button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            <p x-show="servicesList.length === 0" class="text-center text-gray-400 py-8">暂无服务</p>
         </div>
 
         <!-- Groups Tab -->
-        <div x-show="tab === 'groups'" class="bg-white rounded-xl shadow-sm p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-lg font-semibold">分组管理</h2>
-                <button @click="openGroupModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm">+ 添加分组</button>
+        <div x-show="tab === 'groups'" class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+            <div class="flex items-center justify-between mb-4 sm:mb-6">
+                <h2 class="text-base sm:text-lg font-semibold">分组管理</h2>
+                <button @click="openGroupModal()" class="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-xs sm:text-sm">+ 添加分组</button>
             </div>
-            <div class="overflow-x-auto">
+            <!-- Desktop table -->
+            <div class="hidden sm:block overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b border-gray-200">
@@ -126,17 +158,39 @@
                         </template>
                     </tbody>
                 </table>
-                <p x-show="groupsList.length === 0" class="text-center text-gray-400 py-8">暂无分组</p>
             </div>
+            <!-- Mobile cards -->
+            <div class="sm:hidden space-y-3">
+                <template x-for="g in groupsList" :key="g.id">
+                    <div class="border border-gray-200 rounded-lg p-3">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-xl" x-text="g.icon || '📁'"></span>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-medium text-gray-900 text-sm" x-text="g.name"></p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs text-gray-500 mb-3">
+                            <span>列数: <span x-text="g.columns"></span></span>
+                            <span>排序: <span x-text="g.sort_order"></span></span>
+                        </div>
+                        <div class="flex gap-3 border-t border-gray-100 pt-2">
+                            <button @click="openGroupModal(g)" class="text-indigo-600 text-sm">编辑</button>
+                            <button @click="deleteGroup(g.id)" class="text-red-500 text-sm">删除</button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            <p x-show="groupsList.length === 0" class="text-center text-gray-400 py-8">暂无分组</p>
         </div>
 
         <!-- Bookmarks Tab -->
-        <div x-show="tab === 'bookmarks'" class="bg-white rounded-xl shadow-sm p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-lg font-semibold">书签管理</h2>
-                <button @click="openBookmarkModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm">+ 添加书签</button>
+        <div x-show="tab === 'bookmarks'" class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+            <div class="flex items-center justify-between mb-4 sm:mb-6">
+                <h2 class="text-base sm:text-lg font-semibold">书签管理</h2>
+                <button @click="openBookmarkModal()" class="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-xs sm:text-sm">+ 添加书签</button>
             </div>
-            <div class="overflow-x-auto">
+            <!-- Desktop table -->
+            <div class="hidden sm:block overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b border-gray-200">
@@ -162,13 +216,34 @@
                         </template>
                     </tbody>
                 </table>
-                <p x-show="bookmarksList.length === 0" class="text-center text-gray-400 py-8">暂无书签</p>
             </div>
+            <!-- Mobile cards -->
+            <div class="sm:hidden space-y-3">
+                <template x-for="b in bookmarksList" :key="b.id">
+                    <div class="border border-gray-200 rounded-lg p-3">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-xl" x-text="b.icon || '🔗'"></span>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-medium text-gray-900 text-sm" x-text="b.name"></p>
+                                <p class="text-gray-400 text-xs truncate" x-text="b.url"></p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs text-gray-500 mb-3">
+                            <span>排序: <span x-text="b.sort_order"></span></span>
+                        </div>
+                        <div class="flex gap-3 border-t border-gray-100 pt-2">
+                            <button @click="openBookmarkModal(b)" class="text-indigo-600 text-sm">编辑</button>
+                            <button @click="deleteBookmark(b.id)" class="text-red-500 text-sm">删除</button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            <p x-show="bookmarksList.length === 0" class="text-center text-gray-400 py-8">暂无书签</p>
         </div>
 
         <!-- Appearance Tab -->
-        <div x-show="tab === 'appearance'" class="bg-white rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-semibold mb-6">外观设置</h2>
+        <div x-show="tab === 'appearance'" class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+            <h2 class="text-base sm:text-lg font-semibold mb-4 sm:mb-6">外观设置</h2>
             <div class="space-y-5 max-w-lg">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">站点标题</label>
@@ -193,8 +268,8 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Logo（上传或URL）</label>
                     <div class="flex gap-2">
-                        <input type="text" x-model="settingsForm.logo" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="图片URL">
-                        <label class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer text-sm flex items-center">
+                        <input type="text" x-model="settingsForm.logo" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-0" placeholder="图片URL">
+                        <label class="px-3 sm:px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer text-sm flex items-center flex-shrink-0">
                             上传
                             <input type="file" accept="image/*" class="hidden" @change="uploadImage($event, 'logo')">
                         </label>
@@ -203,77 +278,77 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">背景图片（上传或URL）</label>
                     <div class="flex gap-2">
-                        <input type="text" x-model="settingsForm.background_image" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="图片URL">
-                        <label class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer text-sm flex items-center">
+                        <input type="text" x-model="settingsForm.background_image" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-0" placeholder="图片URL">
+                        <label class="px-3 sm:px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer text-sm flex items-center flex-shrink-0">
                             上传
                             <input type="file" accept="image/*" class="hidden" @change="uploadImage($event, 'background_image')">
                         </label>
                     </div>
                 </div>
-                <button @click="saveSettings()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存设置</button>
+                <button @click="saveSettings()" class="w-full sm:w-auto px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存设置</button>
                 <p x-show="settingsSaved" x-transition class="text-green-600 text-sm">已保存</p>
             </div>
         </div>
 
         <!-- Components Tab -->
-        <div x-show="tab === 'components'" class="bg-white rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-semibold mb-6">组件设置</h2>
+        <div x-show="tab === 'components'" class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+            <h2 class="text-base sm:text-lg font-semibold mb-4 sm:mb-6">组件设置</h2>
             <div class="space-y-5 max-w-lg">
                 <div class="flex items-center justify-between">
-                    <div>
-                        <p class="font-medium text-gray-900">搜索栏</p>
-                        <p class="text-gray-500 text-sm">在首页显示搜索栏</p>
+                    <div class="pr-4">
+                        <p class="font-medium text-gray-900 text-sm sm:text-base">搜索栏</p>
+                        <p class="text-gray-500 text-xs sm:text-sm">在首页显示搜索栏</p>
                     </div>
                     <button @click="settingsForm.search_enabled = settingsForm.search_enabled === 'true' ? 'false' : 'true'"
-                        class="w-12 h-6 rounded-full transition-colors relative"
+                        class="w-12 h-6 rounded-full transition-colors relative flex-shrink-0"
                         :class="settingsForm.search_enabled === 'true' ? 'bg-indigo-600' : 'bg-gray-300'">
                         <span class="absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform"
                             :class="settingsForm.search_enabled === 'true' ? 'translate-x-6' : 'translate-x-0.5'"></span>
                     </button>
                 </div>
                 <div class="flex items-center justify-between">
-                    <div>
-                        <p class="font-medium text-gray-900">时钟</p>
-                        <p class="text-gray-500 text-sm">在首页显示实时时钟</p>
+                    <div class="pr-4">
+                        <p class="font-medium text-gray-900 text-sm sm:text-base">时钟</p>
+                        <p class="text-gray-500 text-xs sm:text-sm">在首页显示实时时钟</p>
                     </div>
                     <button @click="settingsForm.clock_enabled = settingsForm.clock_enabled === 'true' ? 'false' : 'true'"
-                        class="w-12 h-6 rounded-full transition-colors relative"
+                        class="w-12 h-6 rounded-full transition-colors relative flex-shrink-0"
                         :class="settingsForm.clock_enabled === 'true' ? 'bg-indigo-600' : 'bg-gray-300'">
                         <span class="absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform"
                             :class="settingsForm.clock_enabled === 'true' ? 'translate-x-6' : 'translate-x-0.5'"></span>
                     </button>
                 </div>
                 <div class="flex items-center justify-between">
-                    <div>
-                        <p class="font-medium text-gray-900">问候语</p>
-                        <p class="text-gray-500 text-sm">根据时间显示问候语</p>
+                    <div class="pr-4">
+                        <p class="font-medium text-gray-900 text-sm sm:text-base">问候语</p>
+                        <p class="text-gray-500 text-xs sm:text-sm">根据时间显示问候语</p>
                     </div>
                     <button @click="settingsForm.greeting_enabled = settingsForm.greeting_enabled === 'true' ? 'false' : 'true'"
-                        class="w-12 h-6 rounded-full transition-colors relative"
+                        class="w-12 h-6 rounded-full transition-colors relative flex-shrink-0"
                         :class="settingsForm.greeting_enabled === 'true' ? 'bg-indigo-600' : 'bg-gray-300'">
                         <span class="absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform"
                             :class="settingsForm.greeting_enabled === 'true' ? 'translate-x-6' : 'translate-x-0.5'"></span>
                     </button>
                 </div>
                 <div class="flex items-center justify-between">
-                    <div>
-                        <p class="font-medium text-gray-900">天气</p>
-                        <p class="text-gray-500 text-sm">在首页显示天气信息</p>
+                    <div class="pr-4">
+                        <p class="font-medium text-gray-900 text-sm sm:text-base">天气</p>
+                        <p class="text-gray-500 text-xs sm:text-sm">在首页显示天气信息</p>
                     </div>
                     <button @click="settingsForm.weather_enabled = settingsForm.weather_enabled === 'true' ? 'false' : 'true'"
-                        class="w-12 h-6 rounded-full transition-colors relative"
+                        class="w-12 h-6 rounded-full transition-colors relative flex-shrink-0"
                         :class="settingsForm.weather_enabled === 'true' ? 'bg-indigo-600' : 'bg-gray-300'">
                         <span class="absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform"
                             :class="settingsForm.weather_enabled === 'true' ? 'translate-x-6' : 'translate-x-0.5'"></span>
                     </button>
                 </div>
-                <button @click="saveSettings()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存设置</button>
+                <button @click="saveSettings()" class="w-full sm:w-auto px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存设置</button>
                 <p x-show="settingsSaved" x-transition class="text-green-600 text-sm">已保存</p>
             </div>
         </div>
         <!-- Security Tab -->
-        <div x-show="tab === 'security'" class="bg-white rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-semibold mb-6">修改密码</h2>
+        <div x-show="tab === 'security'" class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+            <h2 class="text-base sm:text-lg font-semibold mb-4 sm:mb-6">修改密码</h2>
             <div class="space-y-5 max-w-lg">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">旧密码</label>
@@ -289,14 +364,14 @@
                 </div>
                 <p x-show="passwordError" class="text-red-500 text-sm" x-text="passwordError"></p>
                 <p x-show="passwordSuccess" x-transition class="text-green-600 text-sm">密码修改成功</p>
-                <button @click="changePassword()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存密码</button>
+                <button @click="changePassword()" class="w-full sm:w-auto px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存密码</button>
             </div>
         </div>
     </div>
 
     <!-- Service Modal -->
-    <div x-show="showServiceModal" x-transition class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showServiceModal = false">
-        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-xl">
+    <div x-show="showServiceModal" x-transition class="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4" @click.self="showServiceModal = false">
+        <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl p-5 sm:p-6 w-full sm:max-w-xl max-h-[90vh] overflow-y-auto">
             <h3 class="text-lg font-semibold mb-4" x-text="editingService.id ? '编辑服务' : '添加服务'"></h3>
             <div class="space-y-4">
                 <div>
@@ -310,11 +385,11 @@
                 <div x-data="{ showEmojiPicker: false }">
                     <label class="block text-sm font-medium text-gray-700 mb-1">图标（emoji 或 URL）</label>
                     <div class="flex gap-2 items-center relative">
-                        <input type="text" x-model="editingService.icon" @focus="showEmojiPicker = false" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="🌐">
-                        <button type="button" @click="showEmojiPicker = !showEmojiPicker" class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                        <input type="text" x-model="editingService.icon" @focus="showEmojiPicker = false" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-0" placeholder="🌐">
+                        <button type="button" @click="showEmojiPicker = !showEmojiPicker" class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm flex-shrink-0">
                             😀
                         </button>
-                        <img x-show="editingService.icon && (editingService.icon.startsWith('http://') || editingService.icon.startsWith('https://'))" :src="editingService.icon" class="w-6 h-6 object-contain" alt="preview">
+                        <img x-show="editingService.icon && (editingService.icon.startsWith('http://') || editingService.icon.startsWith('https://'))" :src="editingService.icon" class="w-6 h-6 object-contain flex-shrink-0" alt="preview">
                     </div>
                     <div x-show="showEmojiPicker" @click.away="showEmojiPicker = false" class="absolute z-50 mt-1 shadow-xl rounded-lg" x-init="
                         $nextTick(() => {
@@ -358,16 +433,16 @@
                     <label for="status_check" class="text-sm text-gray-700">启用状态检测</label>
                 </div>
             </div>
-            <div class="flex justify-end gap-3 mt-6">
-                <button @click="showServiceModal = false" class="px-4 py-2 text-gray-600 hover:text-gray-900">取消</button>
-                <button @click="saveService()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存</button>
+            <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 mt-6">
+                <button @click="showServiceModal = false" class="px-4 py-2.5 sm:py-2 text-gray-600 hover:text-gray-900 text-center rounded-lg sm:rounded-none hover:bg-gray-100 sm:hover:bg-transparent">取消</button>
+                <button @click="saveService()" class="px-4 py-2.5 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存</button>
             </div>
         </div>
     </div>
 
     <!-- Group Modal -->
-    <div x-show="showGroupModal" x-transition class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showGroupModal = false">
-        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+    <div x-show="showGroupModal" x-transition class="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4" @click.self="showGroupModal = false">
+        <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl p-5 sm:p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
             <h3 class="text-lg font-semibold mb-4" x-text="editingGroup.id ? '编辑分组' : '添加分组'"></h3>
             <div class="space-y-4">
                 <div>
@@ -394,16 +469,16 @@
                     </div>
                 </div>
             </div>
-            <div class="flex justify-end gap-3 mt-6">
-                <button @click="showGroupModal = false" class="px-4 py-2 text-gray-600 hover:text-gray-900">取消</button>
-                <button @click="saveGroup()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存</button>
+            <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 mt-6">
+                <button @click="showGroupModal = false" class="px-4 py-2.5 sm:py-2 text-gray-600 hover:text-gray-900 text-center rounded-lg sm:rounded-none hover:bg-gray-100 sm:hover:bg-transparent">取消</button>
+                <button @click="saveGroup()" class="px-4 py-2.5 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存</button>
             </div>
         </div>
     </div>
 
     <!-- Bookmark Modal -->
-    <div x-show="showBookmarkModal" x-transition class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showBookmarkModal = false">
-        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+    <div x-show="showBookmarkModal" x-transition class="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4" @click.self="showBookmarkModal = false">
+        <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl p-5 sm:p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
             <h3 class="text-lg font-semibold mb-4" x-text="editingBookmark.id ? '编辑书签' : '添加书签'"></h3>
             <div class="space-y-4">
                 <div>
@@ -423,9 +498,9 @@
                     <input type="number" x-model.number="editingBookmark.sort_order" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
             </div>
-            <div class="flex justify-end gap-3 mt-6">
-                <button @click="showBookmarkModal = false" class="px-4 py-2 text-gray-600 hover:text-gray-900">取消</button>
-                <button @click="saveBookmark()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存</button>
+            <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 mt-6">
+                <button @click="showBookmarkModal = false" class="px-4 py-2.5 sm:py-2 text-gray-600 hover:text-gray-900 text-center rounded-lg sm:rounded-none hover:bg-gray-100 sm:hover:bg-transparent">取消</button>
+                <button @click="saveBookmark()" class="px-4 py-2.5 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">保存</button>
             </div>
         </div>
     </div>
