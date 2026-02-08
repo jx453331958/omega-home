@@ -21,13 +21,32 @@
 
 ## 快速开始
 
-### Docker（推荐）
+### Docker 部署（推荐）
+
+预构建的多平台镜像（amd64/arm64）托管在 GitHub Container Registry，每次推送到 main 分支时通过 GitHub Actions 自动构建。
 
 ```bash
 git clone https://github.com/jx453331958/omega-home.git
 cd omega-home
-docker compose up -d
+./deploy.sh deploy
 ```
+
+或者不克隆仓库，直接使用 Docker：
+
+```bash
+docker pull ghcr.io/jx453331958/omega-home:latest
+
+docker run -d \
+  --name omega-home \
+  -p 3000:3000 \
+  -v omega-home-data:/app/data \
+  ghcr.io/jx453331958/omega-home:latest
+```
+
+可用的镜像标签：
+- `latest` — main 分支最新构建
+- `<commit-sha>` — 指定提交（如 `ghcr.io/jx453331958/omega-home:abc1234`）
+- `<version>` — 语义化版本号（如 `ghcr.io/jx453331958/omega-home:1.0.0`）
 
 首次启动会自动生成随机管理密码，通过日志查看：
 
@@ -38,7 +57,7 @@ docker compose logs | grep "Initial admin password"
 输出示例：
 ```
 ========================================
-🔑 Initial admin password: mOl3UyW0zoym
+Initial admin password: mOl3UyW0zoym
 ========================================
 ```
 
@@ -76,13 +95,15 @@ go build -o omega-home .
 ## 部署脚本
 
 ```bash
-./deploy.sh up       # 构建并启动
-./deploy.sh down     # 停止
-./deploy.sh restart  # 重新构建并重启
-./deploy.sh logs     # 查看日志
+./deploy.sh deploy   # 首次部署
+./deploy.sh update   # 拉取最新镜像并重启
+./deploy.sh start    # 启动服务
+./deploy.sh stop     # 停止服务
+./deploy.sh restart  # 重启服务
 ./deploy.sh status   # 查看状态
-
-./update.sh          # 一键拉取最新代码并重新部署
+./deploy.sh logs     # 查看日志
+./deploy.sh backup   # 备份数据库
+./deploy.sh clean    # 删除容器和镜像
 ```
 
 ## 项目结构
