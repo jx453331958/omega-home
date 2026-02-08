@@ -3,12 +3,11 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-echo "🔄 Pulling latest changes..."
-git pull origin main
+echo "Pulling latest image..."
+docker compose pull
 
-echo "🚀 Rebuilding (no cache)..."
-DOCKER_BUILDKIT=1 docker compose build --no-cache
+echo "Restarting with new image..."
 docker compose up -d
 
-echo "✅ Done."
+echo "Done."
 docker compose ps

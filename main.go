@@ -19,6 +19,7 @@ import (
 var templatesFS embed.FS
 
 func main() {
+	log.Println("Omega Home starting...")
 	cfg := config.Load()
 
 	models.InitDB(cfg.DatabaseURL)

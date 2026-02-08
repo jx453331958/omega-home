@@ -1,6 +1,6 @@
 services:
   omega-home:
-    build: .
+    image: ghcr.io/jx453331958/omega-home:latest
     ports:
       - "${PORT:-3000}:3000"
     environment:

@@ -2,5 +2,16 @@ omega-home
 *.db
 data/
 .git
+.gitignore
 .env
-DESIGN.md
+.env.*
+*.md
+*.log
+deploy.sh
+update.sh
+docker-compose.yml
+.dockerignore
+.githooks/
+.github/
+.claude/
+LICENSE
