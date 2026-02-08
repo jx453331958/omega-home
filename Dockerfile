@@ -1,4 +1,5 @@
 FROM --platform=$BUILDPLATFORM tonistiigi/xx AS xx
+# Built via GitHub Actions CI
 
 FROM --platform=$BUILDPLATFORM golang:1.25-alpine AS build
 COPY --from=xx / /
