@@ -19,7 +19,6 @@ IGNORE_PATTERNS=(
     '^docker-compose\.yml$'
     '^\.dockerignore$'
     '^deploy\.sh$'
-    '^update\.sh$'
     '^\.githooks/'
     '^\.github/'
     '^\.claude/'
